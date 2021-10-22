@@ -238,3 +238,6 @@ Temporary Items
 .apdisk
 
 bin/
+
+# Visual Studio Code
+.vscode/
