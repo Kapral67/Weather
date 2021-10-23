@@ -46,7 +46,7 @@ def searchLocation_API(request):
     encoding = response.info().get_content_charset('utf8')
     data = json.loads(response.read().decode(encoding))
     if flag:
-        flags = [False,False]
+        flags = [False, False]
         for c in location[0]['address_components']:
             if c['types'][0] == 'locality':
                 city = string.capwords(c['long_name'])
@@ -61,8 +61,8 @@ def searchLocation_API(request):
         #lat = round(data['properties']['relativeLocation']['geometry']['coordinates'][1],4)
         #lng = round(data['properties']['relativeLocation']['geometry']['coordinates'][0],4)
         newEntry = {'City':city, 'State':state, 'Latitude':lat, 'Longitude':lng}
-        newEntry_serializer = LocationSerializer(data=newEntry)
-        if newEntry_serializer.is_valid(raise_exception=True):
+        newEntry_serializer = LocationSerializer(data = newEntry)
+        if newEntry_serializer.is_valid(raise_exception = True):
             newEntry_serializer.save()
             #return JsonResponse("Updated Successfully",safe=False)
     return data['properties']
@@ -80,24 +80,28 @@ def searchLocation_API(request):
 #@api_view(['GET', 'PUT'])
 @parser_classes([JSONParser])
 def daily_API(request):
-    if request.method=='POST':
+    if request.method == 'POST':
         url = searchLocation_API(request)['forecast']
         response = urllib.request.urlopen(url)
         encoding = response.info().get_content_charset('utf8')
         data = json.loads(response.read().decode(encoding))
-        return JsonResponse(data['properties'], safe=False)
-    if request.method=='GET':
+        return JsonResponse(data['properties'], safe = False)
+    elif request.method == 'GET':
         locations = Locations.objects.all()
-        location_serializer = LocationSerializer(locations,many=True)
-        return JsonResponse(location_serializer.data, safe=False)
+        location_serializer = LocationSerializer(locations, many = True)
+        return JsonResponse(location_serializer.data, safe = False)
 
 @csrf_exempt
 @api_view(['GET', 'POST'])
 @parser_classes([JSONParser])
 def hourly_API(request):
-    if request.method=='GET':
+    if request.method == 'POST':
         url = searchLocation_API(request)['forecastHourly']
         response = urllib.request.urlopen(url)
         encoding = response.info().get_content_charset('utf8')
         data = json.loads(response.read().decode(encoding))
-        return JsonResponse(data['properties'])
+        return JsonResponse(data['properties'], safe = False)
+    elif request.method == 'GET':
+        locations = Locations.objects.all()
+        location_serializer = LocationSerializer(locations, many = True)
+        return JsonResponse(location_serializer.data, safe = False)

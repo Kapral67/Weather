@@ -1,5 +1,8 @@
-﻿<div class="top-row pl-4 navbar navbar-dark">
-    <a class="navbar-brand" href="">weatherFrontEnd</a>
+﻿@* @using System; *@
+@inject IJSRuntime JSRuntime
+
+@* <div class="top-row pl-4 navbar navbar-dark">
+    <a class="navbar-brand" href="">Weather</a>
     <button class="navbar-toggler" @onclick="ToggleNavMenu">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -9,17 +12,12 @@
     <ul class="nav flex-column">
         <li class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
+                <span class="bi bi-clock-fill" aria-hidden="true"></span> Hourly
             </NavLink>
         </li>
         <li class="nav-item px-3">
             <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
+                <span class="bi bi-calendar2-fill" aria-hidden="true"></span> Daily
             </NavLink>
         </li>
     </ul>
@@ -33,5 +31,104 @@
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+} *@
+
+<nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Weather</a>
+
+        @* <div class="container justify-content-center"> *@
+        <div class="row">
+            <div class="col-md-auto">
+                <div class="input-group mb-auto"> 
+                    <input type="text" class="form-control input-text" placeholder="City, State"
+                        aria-hidden="true" @bind="_Location" />
+                            <div class="input-group-append">
+                                <button id="search-button" class="btn btn-primary btn-sm"
+                                    type="button" @onclick="Save">
+
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                            width="16" height="16" fill="currentColor"
+                                            class="bi bi-search" viewBox="0 0 16 16">
+                                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                                        </svg>
+
+                                        @* <i class="fas fa-search"></i> *@
+                                </button>
+                            </div>
+                </div>
+            </div>
+        </div>
+        @* </div> *@
+
+        @*
+        <input class="form-control form-control-sm w-auto mx-auto mt-20"
+            placeholder="City, State" @bind-value="_Location"/>
+        *@
+
+        <button class="navbar-toggler @NavButtonCssClass" type="button" data-bs-toggle="collapse" 
+            data-bs-target="#navbarCollapse" aria-controls="navbarCollapse"
+            aria-label="Toggle navigation" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        @* <div class="container justify-content-right"> *@
+
+        <div class="collapse navbar-collapse @NavBarCssClass" id="navbarCollapse"
+            @onclick="ToggleNavMenu">
+
+            <div class="container justify-content-center">
+
+                <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                            <span class="bi bi-clock-fill" aria-hidden="true"></span> Hourly
+                        </NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="counter">
+                            <span class="bi bi-calendar2-fill" aria-hidden="true"></span> Daily
+                        </NavLink>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        @* </div> *@
+
+    </div>
+</nav>
+
+@code {
+    private bool collapseNavMenu = true;
+    private string NavBarCssClass => collapseNavMenu ? null : "show";
+    private string NavButtonCssClass => collapseNavMenu ? "collapsed" : null;
+
+    private string _Location;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+    public async Task Save(){
+        string City;
+        string State;
+        if(!string.IsNullOrWhiteSpace(_Location)){
+            string cleaned_location = _Location.Trim();
+            string[] tmp = cleaned_location.Split(',');
+            City = tmp[0];
+            State = tmp[1].Trim();
+            _Location = City + ", " + State;
+        }else{
+            City = "San Francisco";
+            State = "CA";
+            _Location = City + ", " + State;
+        }
+        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "City", City);
+        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "State", State);
     }
 }

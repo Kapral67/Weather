@@ -14,7 +14,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -120,7 +119,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -241,3 +239,8 @@ bin/
 
 # Visual Studio Code
 .vscode/
+
+# Blazor
+blazor-wasm/weatherFrontEnd/obj/Debug/net5.0/
+
+*.old

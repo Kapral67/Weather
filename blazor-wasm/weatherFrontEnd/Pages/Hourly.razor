@@ -1,0 +1,84 @@
+﻿@page "/hourly"
+
+@using System.Net.Http
+@using System.Net.Http.Json
+@using System.Net.Http.Headers
+@using System.Threading.Tasks
+@using System.Linq
+@using System.Text.Json
+
+@inject HttpClient Http
+@inject Microsoft.Extensions.Configuration.IConfiguration config
+@inject IJSRuntime JSRuntime
+
+<h1>Weather forecast</h1>
+
+@if (locs == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>City</th>
+                <th>State</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var loc in locs)
+            {
+                <tr>
+                    <td>@loc.City</td>
+                    <td>@loc.State</td>
+                    <td>@loc.Latitude</td>
+                    <td>@loc.Longitude</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<button class="btn btn-primary" type="button" @onclick="Post">Post</button>
+
+@code {
+    public class Locations
+    {
+        public string City { get; set; }
+
+        public string State { get; set; }
+
+        public float Latitude { get; set; }
+
+        public float Longitude { get; set; }
+    }
+    private IEnumerable<Locations> locs = Array.Empty<Locations>();
+
+    protected override async Task OnInitializedAsync(){
+        await refreshList();
+    }
+
+    private async Task refreshList(){
+        locs = await Http.GetFromJsonAsync<IEnumerable<Locations>>(config["API_URL"] + "hourly");
+    }
+
+    private async Task Post(){
+        var locObj = new Locations(){
+            City = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "City"),
+            State = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "State"),
+            Latitude = 0.0F,
+            Longitude = 0.0F
+        };
+
+        var request = new HttpRequestMessage(HttpMethod.Post, config["API_URL"] + "hourly");
+
+        request.Content = new StringContent(JsonSerializer.Serialize(locObj), null, "application/json");
+
+        using var response = await Http.SendAsync(request);
+
+        await refreshList();
+    }
+}

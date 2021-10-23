@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'wBE_app.apps.WbeAppConfig'
 ]
 
+CORS_ORIGIN_ALLOW_ALL = True
+
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
