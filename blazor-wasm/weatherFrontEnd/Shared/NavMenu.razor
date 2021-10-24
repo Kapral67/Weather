@@ -82,12 +82,12 @@
 
                 <ul class="navbar-nav me-auto mb-2 mb-md-0">
                     <li class="nav-item">
-                        <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                        <NavLink class="nav-link" href="hourly">
                             <span class="bi bi-clock-fill" aria-hidden="true"></span> Hourly
                         </NavLink>
                     </li>
                     <li class="nav-item">
-                        <NavLink class="nav-link" href="counter">
+                        <NavLink class="nav-link" href="daily">
                             <span class="bi bi-calendar2-fill" aria-hidden="true"></span> Daily
                         </NavLink>
                     </li>
@@ -115,20 +115,14 @@
     }
 
     public async Task Save(){
-        string City;
-        string State;
         if(!string.IsNullOrWhiteSpace(_Location)){
             string cleaned_location = _Location.Trim();
             string[] tmp = cleaned_location.Split(',');
-            City = tmp[0];
-            State = tmp[1].Trim();
+            string City = tmp[0];
+            string State = tmp[1].Trim();
             _Location = City + ", " + State;
-        }else{
-            City = "San Francisco";
-            State = "CA";
-            _Location = City + ", " + State;
+            await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "City", City);
+            await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "State", State);
         }
-        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "City", City);
-        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "State", State);
     }
 }

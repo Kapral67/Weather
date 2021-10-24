@@ -8,6 +8,138 @@
   "ProjectWorkspaceState": {
     "TagHelpers": [
       {
+        "HashCode": -615800796,
+        "Kind": "Components.Component",
+        "Name": "weatherFrontEnd.App",
+        "AssemblyName": "weatherFrontEnd",
+        "CaseSensitive": true,
+        "TagMatchingRules": [
+          {
+            "TagName": "App"
+          }
+        ],
+        "Metadata": {
+          "Runtime.Name": "Components.IComponent",
+          "Common.TypeName": "weatherFrontEnd.App"
+        }
+      },
+      {
+        "HashCode": 1543123404,
+        "Kind": "Components.Component",
+        "Name": "weatherFrontEnd.App",
+        "AssemblyName": "weatherFrontEnd",
+        "CaseSensitive": true,
+        "TagMatchingRules": [
+          {
+            "TagName": "weatherFrontEnd.App"
+          }
+        ],
+        "Metadata": {
+          "Runtime.Name": "Components.IComponent",
+          "Common.TypeName": "weatherFrontEnd.App",
+          "Components.NameMatch": "Components.FullyQualifiedNameMatch"
+        }
+      },
+      {
+        "HashCode": 1683677845,
+        "Kind": "Components.Component",
+        "Name": "weatherFrontEnd.Pages.Index",
+        "AssemblyName": "weatherFrontEnd",
+        "CaseSensitive": true,
+        "TagMatchingRules": [
+          {
+            "TagName": "Index"
+          }
+        ],
+        "Metadata": {
+          "Runtime.Name": "Components.IComponent",
+          "Common.TypeName": "weatherFrontEnd.Pages.Index"
+        }
+      },
+      {
+        "HashCode": -528942962,
+        "Kind": "Components.Component",
+        "Name": "weatherFrontEnd.Pages.Index",
+        "AssemblyName": "weatherFrontEnd",
+        "CaseSensitive": true,
+        "TagMatchingRules": [
+          {
+            "TagName": "weatherFrontEnd.Pages.Index"
+          }
+        ],
+        "Metadata": {
+          "Runtime.Name": "Components.IComponent",
+          "Common.TypeName": "weatherFrontEnd.Pages.Index",
+          "Components.NameMatch": "Components.FullyQualifiedNameMatch"
+        }
+      },
+      {
+        "HashCode": -1239161867,
+        "Kind": "Components.Component",
+        "Name": "weatherFrontEnd.Pages.Hourly",
+        "AssemblyName": "weatherFrontEnd",
+        "CaseSensitive": true,
+        "TagMatchingRules": [
+          {
+            "TagName": "Hourly"
+          }
+        ],
+        "Metadata": {
+          "Runtime.Name": "Components.IComponent",
+          "Common.TypeName": "weatherFrontEnd.Pages.Hourly"
+        }
+      },
+      {
+        "HashCode": -1360973049,
+        "Kind": "Components.Component",
+        "Name": "weatherFrontEnd.Pages.Hourly",
+        "AssemblyName": "weatherFrontEnd",
+        "CaseSensitive": true,
+        "TagMatchingRules": [
+          {
+            "TagName": "weatherFrontEnd.Pages.Hourly"
+          }
+        ],
+        "Metadata": {
+          "Runtime.Name": "Components.IComponent",
+          "Common.TypeName": "weatherFrontEnd.Pages.Hourly",
+          "Components.NameMatch": "Components.FullyQualifiedNameMatch"
+        }
+      },
+      {
+        "HashCode": -1945592213,
+        "Kind": "Components.Component",
+        "Name": "weatherFrontEnd.Pages.Daily",
+        "AssemblyName": "weatherFrontEnd",
+        "CaseSensitive": true,
+        "TagMatchingRules": [
+          {
+            "TagName": "Daily"
+          }
+        ],
+        "Metadata": {
+          "Runtime.Name": "Components.IComponent",
+          "Common.TypeName": "weatherFrontEnd.Pages.Daily"
+        }
+      },
+      {
+        "HashCode": 1145447027,
+        "Kind": "Components.Component",
+        "Name": "weatherFrontEnd.Pages.Daily",
+        "AssemblyName": "weatherFrontEnd",
+        "CaseSensitive": true,
+        "TagMatchingRules": [
+          {
+            "TagName": "weatherFrontEnd.Pages.Daily"
+          }
+        ],
+        "Metadata": {
+          "Runtime.Name": "Components.IComponent",
+          "Common.TypeName": "weatherFrontEnd.Pages.Daily",
+          "Components.NameMatch": "Components.FullyQualifiedNameMatch"
+        }
+      },
+      {
         "HashCode": 742836089,
         "Kind": "Components.Component",
         "Name": "weatherFrontEnd.Shared.SurveyPrompt",
@@ -186,138 +318,6 @@
         "Metadata": {
           "Runtime.Name": "Components.IComponent",
           "Common.TypeName": "weatherFrontEnd.Shared.NavMenu",
-          "Components.NameMatch": "Components.FullyQualifiedNameMatch"
-        }
-      },
-      {
-        "HashCode": -615800796,
-        "Kind": "Components.Component",
-        "Name": "weatherFrontEnd.App",
-        "AssemblyName": "weatherFrontEnd",
-        "CaseSensitive": true,
-        "TagMatchingRules": [
-          {
-            "TagName": "App"
-          }
-        ],
-        "Metadata": {
-          "Runtime.Name": "Components.IComponent",
-          "Common.TypeName": "weatherFrontEnd.App"
-        }
-      },
-      {
-        "HashCode": 1543123404,
-        "Kind": "Components.Component",
-        "Name": "weatherFrontEnd.App",
-        "AssemblyName": "weatherFrontEnd",
-        "CaseSensitive": true,
-        "TagMatchingRules": [
-          {
-            "TagName": "weatherFrontEnd.App"
-          }
-        ],
-        "Metadata": {
-          "Runtime.Name": "Components.IComponent",
-          "Common.TypeName": "weatherFrontEnd.App",
-          "Components.NameMatch": "Components.FullyQualifiedNameMatch"
-        }
-      },
-      {
-        "HashCode": -1614876094,
-        "Kind": "Components.Component",
-        "Name": "weatherFrontEnd.Pages.Counter",
-        "AssemblyName": "weatherFrontEnd",
-        "CaseSensitive": true,
-        "TagMatchingRules": [
-          {
-            "TagName": "Counter"
-          }
-        ],
-        "Metadata": {
-          "Runtime.Name": "Components.IComponent",
-          "Common.TypeName": "weatherFrontEnd.Pages.Counter"
-        }
-      },
-      {
-        "HashCode": 850279946,
-        "Kind": "Components.Component",
-        "Name": "weatherFrontEnd.Pages.Counter",
-        "AssemblyName": "weatherFrontEnd",
-        "CaseSensitive": true,
-        "TagMatchingRules": [
-          {
-            "TagName": "weatherFrontEnd.Pages.Counter"
-          }
-        ],
-        "Metadata": {
-          "Runtime.Name": "Components.IComponent",
-          "Common.TypeName": "weatherFrontEnd.Pages.Counter",
-          "Components.NameMatch": "Components.FullyQualifiedNameMatch"
-        }
-      },
-      {
-        "HashCode": 1683677845,
-        "Kind": "Components.Component",
-        "Name": "weatherFrontEnd.Pages.Index",
-        "AssemblyName": "weatherFrontEnd",
-        "CaseSensitive": true,
-        "TagMatchingRules": [
-          {
-            "TagName": "Index"
-          }
-        ],
-        "Metadata": {
-          "Runtime.Name": "Components.IComponent",
-          "Common.TypeName": "weatherFrontEnd.Pages.Index"
-        }
-      },
-      {
-        "HashCode": -528942962,
-        "Kind": "Components.Component",
-        "Name": "weatherFrontEnd.Pages.Index",
-        "AssemblyName": "weatherFrontEnd",
-        "CaseSensitive": true,
-        "TagMatchingRules": [
-          {
-            "TagName": "weatherFrontEnd.Pages.Index"
-          }
-        ],
-        "Metadata": {
-          "Runtime.Name": "Components.IComponent",
-          "Common.TypeName": "weatherFrontEnd.Pages.Index",
-          "Components.NameMatch": "Components.FullyQualifiedNameMatch"
-        }
-      },
-      {
-        "HashCode": -1239161867,
-        "Kind": "Components.Component",
-        "Name": "weatherFrontEnd.Pages.Hourly",
-        "AssemblyName": "weatherFrontEnd",
-        "CaseSensitive": true,
-        "TagMatchingRules": [
-          {
-            "TagName": "Hourly"
-          }
-        ],
-        "Metadata": {
-          "Runtime.Name": "Components.IComponent",
-          "Common.TypeName": "weatherFrontEnd.Pages.Hourly"
-        }
-      },
-      {
-        "HashCode": -1360973049,
-        "Kind": "Components.Component",
-        "Name": "weatherFrontEnd.Pages.Hourly",
-        "AssemblyName": "weatherFrontEnd",
-        "CaseSensitive": true,
-        "TagMatchingRules": [
-          {
-            "TagName": "weatherFrontEnd.Pages.Hourly"
-          }
-        ],
-        "Metadata": {
-          "Runtime.Name": "Components.IComponent",
-          "Common.TypeName": "weatherFrontEnd.Pages.Hourly",
           "Components.NameMatch": "Components.FullyQualifiedNameMatch"
         }
       },
@@ -13034,11 +13034,6 @@
       "FileKind": "component"
     },
     {
-      "FilePath": "/home/mkapral/GitHub/Weather/blazor-wasm/weatherFrontEnd/Pages/Counter.razor",
-      "TargetPath": "Pages\\Counter.razor",
-      "FileKind": "component"
-    },
-    {
       "FilePath": "/home/mkapral/GitHub/Weather/blazor-wasm/weatherFrontEnd/Pages/Hourly.razor",
       "TargetPath": "Pages\\Hourly.razor",
       "FileKind": "component"
@@ -13046,6 +13041,11 @@
     {
       "FilePath": "/home/mkapral/GitHub/Weather/blazor-wasm/weatherFrontEnd/Pages/Index.razor",
       "TargetPath": "Pages\\Index.razor",
+      "FileKind": "component"
+    },
+    {
+      "FilePath": "/home/mkapral/GitHub/Weather/blazor-wasm/weatherFrontEnd/Pages/Daily.razor",
+      "TargetPath": "Pages\\Daily.razor",
       "FileKind": "component"
     }
   ],

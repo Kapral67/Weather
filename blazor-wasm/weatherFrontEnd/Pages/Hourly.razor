@@ -66,9 +66,11 @@ else
     }
 
     private async Task Post(){
+        string tmp_City = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "City");
+        string tmp_State = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "State");
         var locObj = new Locations(){
-            City = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "City"),
-            State = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "State"),
+            City = (tmp_City == null) ? "San Francisco" : tmp_City,
+            State = (tmp_State == null) ? "CA" : tmp_State,
             Latitude = 0.0F,
             Longitude = 0.0F
         };
