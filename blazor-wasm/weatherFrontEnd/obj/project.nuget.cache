@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "QI0s0jv7LtzYX1pdrxujcEqqrR4JNbieTRcvB1pvyzvHsHX01mxnb27XiDY2LqwEJqfXaX/+Zvvwuz2RjNZZRg==",
+  "dgSpecHash": "3PMv7OJiYLAgHzVPIN4uQcJv5ufnxi13Hi0FClQCjKMVZKhn+wqkv+mChw8VCSeWg9mGOx3EIebOiCyu2wdwtw==",
   "success": true,
   "projectFilePath": "/home/mkapral/GitHub/Weather/blazor-wasm/weatherFrontEnd/weatherFrontEnd.csproj",
   "expectedPackageFiles": [
@@ -30,8 +30,9 @@
     "/home/mkapral/.nuget/packages/microsoft.jsinterop.webassembly/5.0.8/microsoft.jsinterop.webassembly.5.0.8.nupkg.sha512",
     "/home/mkapral/.nuget/packages/system.io.pipelines/5.0.1/system.io.pipelines.5.0.1.nupkg.sha512",
     "/home/mkapral/.nuget/packages/system.net.http.json/5.0.0/system.net.http.json.5.0.0.nupkg.sha512",
-    "/home/mkapral/.nuget/packages/microsoft.netcore.app.runtime.browser-wasm/5.0.8/microsoft.netcore.app.runtime.browser-wasm.5.0.8.nupkg.sha512",
-    "/home/mkapral/.nuget/packages/microsoft.aspnetcore.app.ref/5.0.0/microsoft.aspnetcore.app.ref.5.0.0.nupkg.sha512"
+    "/home/mkapral/.nuget/packages/microsoft.netcore.app.ref/5.0.0/microsoft.netcore.app.ref.5.0.0.nupkg.sha512",
+    "/home/mkapral/.nuget/packages/microsoft.aspnetcore.app.ref/5.0.0/microsoft.aspnetcore.app.ref.5.0.0.nupkg.sha512",
+    "/home/mkapral/.nuget/packages/microsoft.netcore.app.runtime.browser-wasm/5.0.12/microsoft.netcore.app.runtime.browser-wasm.5.0.12.nupkg.sha512"
   ],
   "logs": []
 }

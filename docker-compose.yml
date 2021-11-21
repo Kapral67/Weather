@@ -1,0 +1,21 @@
+#adapted from example in docker documentation
+version: '3'
+
+services:
+  django:
+    build: ./django
+    volumes:
+       - .:/code
+    ports:
+       - 8000:8000
+    #user: 1000:984
+    command: python /code/django/weatherBackEnd/manage.py runserver 0.0.0.0:8000
+  blazor:
+    build: ./blazor-wasm
+    volumes:
+      - .:/csharp/
+    ports:
+      - 5000:5000
+      - 5001:5001
+      - 47941:47941
+    command: dotnet watch run --project /csharp/blazor-wasm/weatherFrontEnd/weatherFrontEnd.csproj
