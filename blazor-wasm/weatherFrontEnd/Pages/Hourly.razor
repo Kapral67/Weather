@@ -40,47 +40,134 @@ else
             }
         </tbody>
     </table>
+    <button class="btn btn-primary" type="button" @onclick="Post">Post</button>
+    @if (forecast_data != null){
+        <div class="text-center">
+            <h3>City: @City</h3>
+            <h3>State: @State</h3>
+            <p>Feet: @forecast_data.elevation.feet</p>
+            <p>Meters: @forecast_data.elevation.meters</p>
+        </div>
+        <div class="text-right">
+            @if(@age > 1){
+                <sub>Last Updated: @age hours ago.</sub>
+            }
+            else if(@age == 1){
+                <sub>Last Updated: 1 hour ago.</sub>
+            }
+            else{
+                <sub>Last Updated: less than an hour ago.</sub>
+            }
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Degrees Fahrenheit</th>
+                    <th>Degrees Celsius</th>
+                    <th>Wind Speed</th>
+                    <th>Wind Direction</th>
+                    <th>Short Forecast</th>
+                    <th>Icon</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var loc in forecast_data.periods){
+                    <tr>
+                        <td>@loc.startTime.ToString("h:mm tt")</td>
+                        <td>@loc.temperature</td>
+                        <td>@loc.temperatureC</td>
+                        <td>@loc.windSpeed</td>
+                        <td>@loc.windDirection</td>
+                        <td>@loc.shortForecast</td>
+                        <td><img src=@loc.iconBase></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
 }
 
-<button class="btn btn-primary" type="button" @onclick="Post">Post</button>
-
 @code {
-    public class Locations
-    {
+    public class Locations{
         public string City { get; set; }
-
         public string State { get; set; }
-
         public float Latitude { get; set; }
-
         public float Longitude { get; set; }
     }
     private IEnumerable<Locations> locs = Array.Empty<Locations>();
-
     protected override async Task OnInitializedAsync(){
         await refreshList();
     }
-
     private async Task refreshList(){
-        locs = await Http.GetFromJsonAsync<IEnumerable<Locations>>(config["API_URL"] + "hourly");
+        locs = await Http.GetFromJsonAsync<IEnumerable<Locations>>(config["API_URL"] +
+            "hourly");
     }
-
+    private Metadata forecast_data;
+    private string City;
+    private string State;
+    private TimeSpan t => (DateTimeOffset.UtcNow - forecast_data.updated);
+    private int age => (int)Math.Round(t.TotalHours,0,MidpointRounding.AwayFromZero);
     private async Task Post(){
-        string tmp_City = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "City");
-        string tmp_State = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "State");
+        string tmp_City = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem",
+            "City");
+        string tmp_State = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem",
+                "State");
         var locObj = new Locations(){
             City = (tmp_City == null) ? "San Francisco" : tmp_City,
             State = (tmp_State == null) ? "CA" : tmp_State,
             Latitude = 0.0F,
             Longitude = 0.0F
         };
-
-        var request = new HttpRequestMessage(HttpMethod.Post, config["API_URL"] + "hourly");
-
-        request.Content = new StringContent(JsonSerializer.Serialize(locObj), null, "application/json");
-
+        City = locObj.City;
+        State = locObj.State;
+        var request = new HttpRequestMessage(HttpMethod.Post,
+            config["API_URL"] + "hourly");
+        request.Content = new StringContent(JsonSerializer.Serialize(locObj),
+            null, "application/json");
         using var response = await Http.SendAsync(request);
 
+        forecast_data = await response.Content.ReadFromJsonAsync<Metadata>();
+
         await refreshList();
+    }
+
+    public class Period{
+        public int number { get; set; }
+        public string name { get; set; }
+        public DateTimeOffset startTime { get; set; }
+        public DateTimeOffset endTime { get; set; }
+        public bool isDaytime { get; set; }
+        public int temperature { get; set;  }
+        public int temperatureC => (int)Math.Round(
+            ((double)((temperature - 32)*0.5556)),0,MidpointRounding.ToEven);
+        public char temperatureUnit { get; set; }
+        public string temperatureTrend { get; set; }
+        public string windSpeed { get; set; }
+        public string windDirection { get; set; }
+        public string icon { get; set; }
+        public string iconBase => (icon.IndexOf("?") > 0) ? icon.Substring(0,
+            icon.IndexOf("?")) : icon;
+        public string shortForecast { get; set; }
+        public string detailedForecast { get; set; }
+    }
+
+    public class Elevation{
+        public string unitCode { get; set; }
+        public double value { get; set; }
+        public float meters => (float)Math.Round(value,2,MidpointRounding.ToEven);
+        public float feet => (float)Math.Round((value * 3.2808398950131),2,
+            MidpointRounding.ToEven);
+    }
+
+    public class Metadata{
+        public DateTimeOffset updated { get; set; }
+        public string units { get; set; }
+        public string forecastGenerator { get; set; }
+        public DateTimeOffset generatedAt { get; set; }
+        public DateTimeOffset updateTime { get; set; }
+        public string validTimes { get; set; }
+        public Elevation elevation { get; set; }
+        public IEnumerable<Period> periods { get; set; }
     }
 }
