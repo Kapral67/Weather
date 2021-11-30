@@ -1,0 +1,39 @@
+@page "/user"
+
+@using System.Net.Http
+@using System.Net.Http.Json
+@using System.Net.Http.Headers
+@using System.Threading.Tasks
+@using System.Linq
+@using System.Text.Json
+
+@inject HttpClient Http
+@inject Microsoft.Extensions.Configuration.IConfiguration config
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavMan
+
+
+
+@code {
+    protected override async Task OnInitializedAsync(){
+        await refreshUserData();
+    }
+
+    private async Task refreshUserData(){
+        string cookie = await JSRuntime.InvokeAsync<string>("blazorExtensions.ReadCookie",
+            "Authorization");
+        if(cookie == null || cookie == ""){
+            // User not authenticated case
+            NavMan.NavigateTo("/login");
+        }else{
+            // User authenticated case
+            string token = cookie.Substring(cookie.IndexOf(" ") + 1);
+            var userRequest = new HttpRequestMessage(HttpMethod.Get,
+                config["API_URL"] + "user");
+            userRequest.Headers.Authorization = new AuthenticationHeaderValue(
+                "Authorization", token);
+            using var userResponse = await Http.SendAsync(userRequest);
+            
+        }
+    }
+}

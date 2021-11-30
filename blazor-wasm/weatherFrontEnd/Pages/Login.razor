@@ -1,0 +1,77 @@
+@page "/login"
+
+@using System.Net.Http
+@using System.Net.Http.Json
+@using System.Net.Http.Headers
+@using System.Threading.Tasks
+@using System.Linq
+@using System.Text.Json
+
+@inject HttpClient Http
+@inject Microsoft.Extensions.Configuration.IConfiguration config
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavMan
+
+<div class="card">
+    <h4 class="card-header">Login</h4>
+    <div class="card-body">
+        <EditForm Model="@model" OnValidSubmit="Post">
+            <DataAnnotationsValidator />
+            <div class="form-group">
+                <label>Username</label>
+                <InputText @bind-Value="model.username" class="form-control" />
+                <ValidationMessage For="@(() => model.username)" />
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <InputText @bind-Value="model.password" type="password" class="form-control" />
+                <ValidationMessage For="@(() => model.password)" />
+            </div>
+            <button disabled="@loading" class="btn btn-primary">
+                @if (loading) 
+                {
+                    <span class="spinner-border spinner-border-sm mr-1"></span>
+                }
+                Login
+            </button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private Models.Log model = new Models.Log();
+    private bool loading;
+
+    private async Task Post(){
+        loading = true;
+        if(model.username != null && model.password != null){
+            var authRequest = new HttpRequestMessage(HttpMethod.Post, config["API_URL"] + "login");
+            authRequest.Content = new StringContent(JsonSerializer.Serialize(model), null,
+                "application/json");
+            using var authResponse = await Http.SendAsync(authRequest);
+            auth = await authResponse.Content.ReadFromJsonAsync<AuthResponse>();
+            string token = "Token " + auth.token;
+            await JSRuntime.InvokeAsync<string>("blazorExtensions.WriteCookie", "Authorization",
+                token, auth.expiry);
+            var userRequest = new HttpRequestMessage(HttpMethod.Get, config["API_URL"] + "user");
+            userRequest.Headers.Authorization = new AuthenticationHeaderValue("Authorization", token);  
+            using var userResponse = await Http.SendAsync(userRequest);
+            user = await userResponse.Content.ReadFromJsonAsync<UserResponse>();
+            NavMan.NavigateTo("/user");
+        }
+    }
+
+    private AuthResponse auth;
+    private UserResponse user;
+
+    public class AuthResponse{
+        public DateTime expiry;
+        public string token;
+    }
+
+    public class UserResponse{
+        public int id;
+        public string username;
+        public string email;
+    }
+}

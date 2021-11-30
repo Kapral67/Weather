@@ -1,0 +1,14 @@
+@media (min-width: 770px) {
+    .navbar-toggler {
+        display: none;
+    }
+
+    .collapse {
+        /* Never collapse the sidebar for wide screens */
+        display: block;
+    }
+
+    .hid {
+        display: inline-block;
+    }
+}

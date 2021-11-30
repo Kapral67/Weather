@@ -95,9 +95,39 @@
 
             </div>
 
-        </div>
+            <div class="container justify-content-right">
+                @* @if(collapseNavMenu){ *@
+                    <div class="hid text-right" style="float:right">
+                        <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                            <li class="nav-item">
+                                <NavLink class="nav-link" href="">
+                                    <span class="bi bi-box-arrow-in-right" aria-hidden="true"></span> Login
+                                </NavLink>
+                            </li>
+                            <li class="nav-item">
+                                <NavLink class="nav-link" href="">
+                                    <span class="bi bi-box-arrow-left" aria-hidden="true"></span> Create
+                                </NavLink>
+                            </li>
+                        </ul>
+                    </div>
+                @* }else{
+                    <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="">
+                                <span class="bi bi-box-arrow-in-right" aria-hidden="true"></span> Login
+                            </NavLink>
+                        </li>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="">
+                                <span class="bi bi-box-arrow-left" aria-hidden="true"></span> Logout
+                            </NavLink>
+                        </li>
+                    </ul>
+                } *@
+            </div>
 
-        @* </div> *@
+        </div>
 
     </div>
 </nav>

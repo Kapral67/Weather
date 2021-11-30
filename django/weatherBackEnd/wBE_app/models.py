@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -34,3 +35,10 @@ class Locations(models.Model):
             models.UniqueConstraint(fields=['City', 'State'], name='Unique City, ST'),
             models.UniqueConstraint(fields=['Latitude', 'Longitude'], name='Unique Location')
         ]
+
+class UserPref(models.Model):
+    METRIC = ['Metric', 'US']
+    PAGE = ['hourly', 'daily', 'account']
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    measurement = models.CharField(choices=METRIC, max_length=10, blank=True)
+    defaultPage = models.CharField(choices=PAGE, max_length=10, blank=True)
