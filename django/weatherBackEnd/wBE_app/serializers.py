@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from wBE_app.models import Locations, UserPref
-#from django.contrib.auth.models import User
+from wBE_app.models import Locations, Account
 
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -9,15 +8,24 @@ class LocationSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserPref
-        fields = ('id', 'username', 'email', 'measurement', 'defaultPage')
+        model = Account
+        fields = ['id', 'email', 'measurement', 'defaultPage']
 
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserPref
-        fields = ('id', 'username', 'email', 'password')
-        extra_kwargs = {'password': {'write_only': True}}
-
+        model = Account
+        fields = ['id', 'email', 'measurement', 'defaultPage', 'password']
+        extra_kwargs = {"password": {"write_only": True}}
     def create(self, validated_data):
-        user = UserPref.objects.create_user(validated_data['username'], validated_data['email'], validated_data['password'])
+        user = Account.objects.create_user(**validated_data)
         return user
+
+class ChangePasswordSerializer(serializers.Serializer):
+    model = Account
+    old_password = serializers.CharField(required = True)
+    new_password = serializers.CharField(required = True)
+
+class AlterPrefsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = ('measurement', 'defaultPage')

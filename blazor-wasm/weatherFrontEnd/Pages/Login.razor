@@ -40,6 +40,8 @@
 
 @code {
     private Models.Log model = new Models.Log();
+    private Models.UserResponse user = new Models.UserResponse();
+    private Models.AuthResponse auth = new Models.AuthResponse();
     private bool loading;
 
     private async Task Post(){
@@ -49,29 +51,15 @@
             authRequest.Content = new StringContent(JsonSerializer.Serialize(model), null,
                 "application/json");
             using var authResponse = await Http.SendAsync(authRequest);
-            auth = await authResponse.Content.ReadFromJsonAsync<AuthResponse>();
+            auth = await authResponse.Content.ReadFromJsonAsync<Models.AuthResponse>();
             string token = "Token " + auth.token;
             await JSRuntime.InvokeAsync<string>("blazorExtensions.WriteCookie", "Authorization",
                 token, auth.expiry);
             var userRequest = new HttpRequestMessage(HttpMethod.Get, config["API_URL"] + "user");
             userRequest.Headers.Authorization = new AuthenticationHeaderValue("Authorization", token);  
             using var userResponse = await Http.SendAsync(userRequest);
-            user = await userResponse.Content.ReadFromJsonAsync<UserResponse>();
+            user = await userResponse.Content.ReadFromJsonAsync<Models.UserResponse>();
             NavMan.NavigateTo("/user");
         }
-    }
-
-    private AuthResponse auth;
-    private UserResponse user;
-
-    public class AuthResponse{
-        public DateTime expiry;
-        public string token;
-    }
-
-    public class UserResponse{
-        public int id;
-        public string username;
-        public string email;
     }
 }

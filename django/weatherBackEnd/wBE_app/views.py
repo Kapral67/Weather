@@ -10,18 +10,21 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.debug import sensitive_post_parameters
 from django.contrib.auth import login
 
-from rest_framework import generics, permissions
-from rest_framework.decorators import api_view, parser_classes
+from rest_framework import generics, permissions, status, mixins
+from rest_framework.decorators import api_view, parser_classes, permission_classes
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
+from rest_framework.serializers import Serializer
 from rest_framework.views import APIView
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 
 from knox.views import LoginView as KnoxLoginView
 from knox.models import AuthToken
 
-from wBE_app.serializers import LocationSerializer, UserSerializer, RegisterSerializer
-from wBE_app.models import Locations
+from rest_auth.registration.views import RegisterView
+
+from wBE_app.serializers import AlterPrefsSerializer, LocationSerializer, UserSerializer, RegisterSerializer, ChangePasswordSerializer
+from wBE_app.models import Locations, Account
 
 gmaps = googlemaps.Client(key = '') # DO NOT MAKE KEY PUBLIC!
 NWS_URL = 'https://api.weather.gov/points/'
@@ -75,14 +78,6 @@ def searchLocation_API(request):
             #return JsonResponse("Updated Successfully",safe=False)
     return data['properties']
 
-# for item in data['properties']['periods']:
-#   item.keys()
-# ==>> n items of dict:
-# ==>> dict_keys(['number', 'name', 'startTime', 'endTime',
-#            'isDaytime', 'temperature', 'temperatureUnit', 
-#            'temperatureTrend', 'windSpeed', 'windDirection', 
-#            'icon', 'shortForecast', 'detailedForecast'])
-
 @csrf_exempt
 @api_view(['GET', 'POST'])
 #@api_view(['GET', 'PUT'])
@@ -114,6 +109,39 @@ def hourly_API(request):
         location_serializer = LocationSerializer(locations, many = True)
         return JsonResponse(location_serializer.data, safe = False)
 
+# class RegisterAPI(RegisterView):
+#     queryset = User.objects.all()
+
+# class UserAPI(APIView):
+#     @staticmethod
+#     def get(request):
+#         users = Account.objects.all()
+#         serializer = UserSerializer(users, many=True)
+#         return Response(serializer.data)
+
+class GenericUserAPI(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin,
+        mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser,]
+    serializer_class = UserSerializer
+    queryset = Account.objects.all()
+
+    lookup_field = 'id'
+
+    def get(self, request, id=None):
+        if id:
+            return self.retrieve(request)
+        else:
+            return self.list(request)
+
+    # def post(self, request):
+    #     return self.create(request)
+    
+    def put(self, request):
+        return self.update(request, id)
+
+    def delete(self, request, id):
+        return self.destroy(request, id)
+
 class RegisterAPI(generics.GenericAPIView):
     serializer_class = RegisterSerializer
     def post(self, request, *args, **kwargs):
@@ -139,3 +167,63 @@ class UserAPI(generics.RetrieveAPIView):
     serializer_class = UserSerializer
     def get_object(self):
         return self.request.user
+
+# class PreferencesAPI(generics.RetrieveAPIView):
+#     permission_classes = [permissions.IsAuthenticated,]
+#     serializer_class = PreferencesSerializer
+#     def get_object(self):
+#         return self.request.user
+
+class ChangePasswordAPI(generics.UpdateAPIView):
+    serializer_class = ChangePasswordSerializer
+    model = Account
+    permission_classes = [permissions.IsAuthenticated,]
+
+    def get_object(self, queryset = None):
+        obj = self.request.user
+        return obj
+    
+    def update(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        serializer = self.get_serializer(data = request.data)
+        if serializer.is_valid():
+            if not self.object.check_password(serializer.data.get("old_password")):
+                return Response({"old_password": ["Wrong password."]},
+                    status = 420)
+            self.object.set_password(serializer.data.get("new_password"))
+            self.object.save()
+            response = {
+                'status': 'success',
+                'code': status.HTTP_202_ACCEPTED,
+                'message': 'Password updated successfully',
+                'data': []
+            }
+            return Response(response)
+        return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+
+class AlterPrefsAPI(generics.UpdateAPIView):
+    serializer_class = AlterPrefsSerializer
+    model = Account
+    permission_classes = [permissions.IsAuthenticated,]
+
+    def get_object(self, queryset = None):
+        obj = self.request.user
+        return obj
+    
+    def update(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        serializer = self.get_serializer(data = request.data, partial = True)
+        if serializer.is_valid():
+            ut = serializer.data.get('measurement')
+            pg = serializer.data.get('defaultPage')
+            if ut != "" or pg != "":
+                if ut != "":
+                    self.object.measurement = serializer.data.get('measurement')
+                if pg != "":
+                    self.object.defaultPage = serializer.data.get('defaultPage')
+                self.object.save()
+                return Response(serializer.data, status = status.HTTP_202_ACCEPTED)
+            else:
+                return Response(status = status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)

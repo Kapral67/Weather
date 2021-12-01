@@ -19,6 +19,7 @@
         await refreshUserData();
     }
 
+    private Models.UserResponse user = new Models.UserResponse();
     private async Task refreshUserData(){
         string cookie = await JSRuntime.InvokeAsync<string>("blazorExtensions.ReadCookie",
             "Authorization");
@@ -33,7 +34,7 @@
             userRequest.Headers.Authorization = new AuthenticationHeaderValue(
                 "Authorization", token);
             using var userResponse = await Http.SendAsync(userRequest);
-            
+            user = await userResponse.Content.ReadFromJsonAsync<Models.UserResponse>();
         }
     }
 }
