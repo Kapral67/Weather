@@ -160,3 +160,7 @@ REST_AUTH_SERIALIZERS = {
 REST_AUTH_REGISTER_SERIALIZERS = {
     'REGISTER_SERIALIZER': 'wBE_app.serializers.RegisterSerializer'
 }
+
+from datetime import timedelta
+
+REST_KNOX = {'TOKEN_TTL': timedelta(hours=24)}

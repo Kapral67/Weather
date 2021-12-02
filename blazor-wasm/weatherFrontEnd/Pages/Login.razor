@@ -18,9 +18,9 @@
         <EditForm Model="@model" OnValidSubmit="Post">
             <DataAnnotationsValidator />
             <div class="form-group">
-                <label>Username</label>
-                <InputText @bind-Value="model.username" class="form-control" />
-                <ValidationMessage For="@(() => model.username)" />
+                <label>Email</label>
+                <InputText @bind-Value="model.email" class="form-control" />
+                <ValidationMessage For="@(() => model.email)" />
             </div>
             <div class="form-group">
                 <label>Password</label>
@@ -35,6 +35,9 @@
                 Login
             </button>
         </EditForm>
+        @if (error){
+            <p>ERROR!</p>
+        }
     </div>
 </div>
 
@@ -44,9 +47,11 @@
     private Models.AuthResponse auth = new Models.AuthResponse();
     private bool loading;
 
+    private bool error = false;
+
     private async Task Post(){
         loading = true;
-        if(model.username != null && model.password != null){
+        if(model.email != null && model.password != null){
             var authRequest = new HttpRequestMessage(HttpMethod.Post, config["API_URL"] + "login");
             authRequest.Content = new StringContent(JsonSerializer.Serialize(model), null,
                 "application/json");
@@ -56,10 +61,15 @@
             await JSRuntime.InvokeAsync<string>("blazorExtensions.WriteCookie", "Authorization",
                 token, auth.expiry);
             var userRequest = new HttpRequestMessage(HttpMethod.Get, config["API_URL"] + "user");
-            userRequest.Headers.Authorization = new AuthenticationHeaderValue("Authorization", token);  
+            userRequest.Headers.Authorization = new AuthenticationHeaderValue("Token", auth.token);  
             using var userResponse = await Http.SendAsync(userRequest);
-            user = await userResponse.Content.ReadFromJsonAsync<Models.UserResponse>();
-            NavMan.NavigateTo("/user");
+            @* user = await userResponse.Content.ReadFromJsonAsync<Models.UserResponse>(); *@
+            if(userResponse.IsSuccessStatusCode)
+                NavMan.NavigateTo("/user");
+            else{
+                error = true;
+                loading = false;
+            }
         }
     }
 }
