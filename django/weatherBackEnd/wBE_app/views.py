@@ -143,15 +143,19 @@ class GenericUserAPI(generics.GenericAPIView, mixins.ListModelMixin, mixins.Crea
         return self.destroy(request, id)
 
 class RegisterAPI(generics.GenericAPIView):
+    permission_classes = (permissions.AllowAny,)
     serializer_class = RegisterSerializer
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data = request.data)
         if serializer.is_valid(raise_exception = True):
-            user = serializer.save()
-            return Response({
-                "user": UserSerializer(user, context = self.get_serializer_context()).data,
-                "token": AuthToken.objects.create(user)[1]
-            })
+            serializer.save()
+            return Response(serializer.data, status = status.HTTP_202_ACCEPTED)
+            # return Response({
+            #     "user": UserSerializer(user, context = self.get_serializer_context()).data,
+            #     "token": AuthToken.objects.create(user)[1]
+            # })
+        else:
+            return Response(serializer.errors, status = status.HTTP_418_IM_A_TEAPOT)
 
 class LoginAPI(KnoxLoginView):
     permission_classes = (permissions.AllowAny,)
@@ -216,14 +220,11 @@ class AlterPrefsAPI(generics.UpdateAPIView):
         if serializer.is_valid():
             ut = serializer.data.get('measurement')
             pg = serializer.data.get('defaultPage')
-            if ut != "" or pg != "":
-                if ut != "":
-                    self.object.measurement = serializer.data.get('measurement')
-                if pg != "":
-                    self.object.defaultPage = serializer.data.get('defaultPage')
-                self.object.save()
-                return Response(serializer.data, status = status.HTTP_202_ACCEPTED)
-            else:
-                return Response(status = status.HTTP_204_NO_CONTENT)
+            self.object.measurement = ut
+            self.object.defaultPage = pg
+            self.object.save()
+            return Response(serializer.data, status = status.HTTP_202_ACCEPTED)
+            # else:
+            #     return Response(status = status.HTTP_204_NO_CONTENT)
         else:
             return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)

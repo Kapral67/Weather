@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace weatherFrontEnd.Models{
     public class Log{
-        public string email { get; set; }
+        public string username { get; set; }
         public string password { get; set; }
     }
     public class UserResponse{
@@ -18,5 +18,15 @@ namespace weatherFrontEnd.Models{
     public class Pref{
         public string measurement { get; set; }
         public string defaultPage { get; set; }
+    }
+    public class Passwd{
+        public string old_password { get; set; }
+        public string new_password { get; set; }
+    }
+    public class Register{
+        public string email { get; set; }
+        public string measurement { get; set; }
+        public string defaultPage { get; set; }
+        public string password { get; set; }
     }
 }

@@ -106,9 +106,9 @@ class Account(AbstractUser):
     # is_active = models.BooleanField(default=True)
     # is_staff = models.BooleanField(default=False)
     # is_superuser = models.BooleanField(default=False)
-    METRIC = [('SI', 'SI'), ('US', 'US')]
+    METRIC = [('SI', 'SI'), ('US', 'US'), ('Default', 'Default')]
     measurement = models.CharField(choices=METRIC, max_length=16, blank=True)
-    PAGE = [('Hourly', 'Hourly'), ('Daily', 'Daily'), ('Account', 'Account')]
+    PAGE = [('Hourly', 'Hourly'), ('Daily', 'Daily'), ('Account', 'Account'), ('Default', 'Default')]
     defaultPage = models.CharField(choices=PAGE, max_length=16, blank=True)
 
     USERNAME_FIELD = 'email'

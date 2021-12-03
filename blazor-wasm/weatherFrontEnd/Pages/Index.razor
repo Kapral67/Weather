@@ -1,7 +1,48 @@
 ﻿@page "/"
 
-<h1>Hello, world!</h1>
+@using System.Net.Http
+@using System.Net.Http.Json
+@using System.Net.Http.Headers
+@using System.Threading.Tasks
+@using System.Linq
+@using System.Text.Json
 
-Welcome to your new app.
+@inject HttpClient Http
+@inject Microsoft.Extensions.Configuration.IConfiguration config
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavMan
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+@code{
+    private Models.UserResponse user = new Models.UserResponse();
+    protected override async Task OnInitializedAsync(){
+        await Redirect();
+    }
+    private async Task Redirect(){
+        string cookie = await JSRuntime.InvokeAsync<string>("blazorExtensions.ReadCookie", "Authorization");
+        try{
+            string token = cookie.Substring(cookie.IndexOf(" ") + 1);
+            var prefRequest = new HttpRequestMessage(HttpMethod.Get, config["API_URL"] + "user");
+            prefRequest.Headers.Authorization = new AuthenticationHeaderValue("Token", token);
+            using var prefResponse = await Http.SendAsync(prefRequest);
+            if(prefResponse.IsSuccessStatusCode){
+                user = await prefResponse.Content.ReadFromJsonAsync<Models.UserResponse>();
+            }else{
+                throw new Exception();
+            }
+        }catch(Exception){ 
+            await JSRuntime.InvokeAsync<string>("blazorExtensions.DeleteCookie", "Authorization");
+        }
+        string page = user.defaultPage;
+        switch(page){
+            case "Hourly" :
+                NavMan.NavigateTo("/hourly", forceLoad: true);
+                break;
+            case "Account" :
+                NavMan.NavigateTo("/user", forceLoad: true);
+                break;
+            default :
+                NavMan.NavigateTo("/daily", forceLoad: true);
+                break;
+        }
+    }
+}

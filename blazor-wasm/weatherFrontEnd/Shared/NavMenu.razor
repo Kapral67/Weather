@@ -1,4 +1,12 @@
-﻿@* @using System; *@
+﻿@using System.Net.Http
+@using System.Net.Http.Json
+@using System.Net.Http.Headers
+@using System.Threading.Tasks
+@using System.Linq
+@using System.Text.Json
+
+@inject HttpClient Http
+@inject Microsoft.Extensions.Configuration.IConfiguration config
 @inject IJSRuntime JSRuntime
 
 @* <div class="top-row pl-4 navbar navbar-dark">
@@ -94,10 +102,36 @@
                 </ul>
 
             </div>
-
-            <div class="container justify-content-right">
-                @* @if(collapseNavMenu){ *@
-                    <div class="hid text-right" style="float:right">
+            @if(pending){
+                <div class="container justify-content-right">
+                    @* @if(collapseNavMenu){ *@
+                        <div class="hid text-right" style="float:right">
+                            <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                                <li class="nav-item">
+                                    @if (loggedout){
+                                        <NavLink class="nav-link active" href="/login">
+                                            <span class="bi bi-box-arrow-in-right" aria-hidden="false"></span> Login
+                                        </NavLink>
+                                    }else{
+                                        <NavLink class="nav-link active" href="/logout">
+                                            <span class="bi bi-box-arrow-left" aria-hidden="false"></span> Logoff
+                                        </NavLink>
+                                    }
+                                </li>
+                                <li class="nav-item">
+                                    @if (loggedout){
+                                        <NavLink class="nav-link active" href="/register">
+                                            <span class="bi bi-pencil-square" aria-hidden="false"></span> Register
+                                        </NavLink>
+                                    }else{
+                                        <NavLink class="nav-link active" href="/user">
+                                            <span class="bi bi-gear-wide-connected" aria-hidden="false"></span> Preferences
+                                        </NavLink>
+                                    }
+                                </li>
+                            </ul>
+                        </div>
+                    @* }else{
                         <ul class="navbar-nav me-auto mb-2 mb-md-0">
                             <li class="nav-item">
                                 <NavLink class="nav-link" href="">
@@ -106,38 +140,42 @@
                             </li>
                             <li class="nav-item">
                                 <NavLink class="nav-link" href="">
-                                    <span class="bi bi-box-arrow-left" aria-hidden="true"></span> Create
+                                    <span class="bi bi-box-arrow-left" aria-hidden="true"></span> Logout
                                 </NavLink>
                             </li>
                         </ul>
-                    </div>
-                @* }else{
-                    <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                        <li class="nav-item">
-                            <NavLink class="nav-link" href="">
-                                <span class="bi bi-box-arrow-in-right" aria-hidden="true"></span> Login
-                            </NavLink>
-                        </li>
-                        <li class="nav-item">
-                            <NavLink class="nav-link" href="">
-                                <span class="bi bi-box-arrow-left" aria-hidden="true"></span> Logout
-                            </NavLink>
-                        </li>
-                    </ul>
-                } *@
-            </div>
-
+                    } *@
+                </div>
+            }
         </div>
 
     </div>
 </nav>
 
 @code {
-    private bool collapseNavMenu = true;
+    private bool collapseNavMenu = true, loggedout = true, pending = false;
     private string NavBarCssClass => collapseNavMenu ? null : "show";
     private string NavButtonCssClass => collapseNavMenu ? "collapsed" : null;
 
     private string _Location;
+
+    protected override async Task OnInitializedAsync(){
+        await checkLoginStatus();
+    }
+
+    private async Task checkLoginStatus(){
+        string cookie = await JSRuntime.InvokeAsync<string>("blazorExtensions.ReadCookie", "Authorization");
+        try{
+            string token = cookie.Substring(cookie.IndexOf(" ") + 1);
+            var checkRequest = new HttpRequestMessage(HttpMethod.Get, config["API_URL"] + "user");
+            checkRequest.Headers.Authorization = new AuthenticationHeaderValue("Token", token);
+            using var checkResponse = await Http.SendAsync(checkRequest);
+            if(checkResponse.IsSuccessStatusCode){
+                loggedout = false;
+            }
+        }catch(Exception){ }
+        pending = true;
+    }
 
     private void ToggleNavMenu()
     {

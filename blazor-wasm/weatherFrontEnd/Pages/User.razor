@@ -27,13 +27,7 @@ else
                 <label>Measurement</label>
                 <select class="form-control" @bind="@selectedMeasurement">
                     @foreach (var unit in units){
-                        @if(@unit == "")
-                        {
-                            <option value="@unit"> Default </option>
-                        }
-                        else{
-                            <option value="@unit"> @unit </option>
-                        }
+                        <option value="@unit"> @unit </option>
                     }
                 </select>
             </div>
@@ -41,17 +35,11 @@ else
                 <label>Home Page</label>
                 <select class="form-control" @bind="@selectedPage">
                     @foreach (var pg in pages){
-                        @if(@pg == "")
-                        {
-                            <option value="@pg"> Default </option>
-                        }
-                        else{
-                            <option value="@pg"> @pg </option>
-                        }
+                        <option value="@pg"> @pg </option>
                     }
                 </select>
             </div>
-            <button disabled="@loading" class="btn btn-primary" @onclick="Save">
+            <button disabled="@loading" class="btn btn-primary" @onclick="@Save">
                 @if(loading)
                 {
                     <span class="spinner-border spinner-border-sm mr-1"></span>
@@ -63,59 +51,55 @@ else
     @if (saved){
         <p>SAVED!</p>
     }
-    @* <div class="card">
+    <div class="card">
         <h4 class="card-header">Change Password</h4>
         <div class="card-body">
-            <EditForm Model="@model" OnValidSubmit="Post">
+            <EditForm Model="@model" OnValidSubmit="@Post">
                 <DataAnnotationsValidator />
                 <div class="form-group">
-                    <label>Username</label>
-                    <InputText @bind-Value="model.username" class="form-control" />
-                    <ValidationMessage For="@(() => model.username)" />
+                    <label>Verify Password</label>
+                    <InputText @bind-Value="model.old_password" type="password" class="form-control" />
+                    <ValidationMessage For="@(() => model.old_password)" />
                 </div>
                 <div class="form-group">
-                    <label>Password</label>
-                    <InputText @bind-Value="model.password" type="password" class="form-control" />
-                    <ValidationMessage For="@(() => model.password)" />
+                    <label>New Password</label>
+                    <InputText @bind-Value="model.new_password" type="password" class="form-control" />
+                    <ValidationMessage For="@(() => model.new_password)" />
                 </div>
                 <button disabled="@loading" class="btn btn-primary">
-                    @if (loading) 
+                    @if (load) 
                     {
                         <span class="spinner-border spinner-border-sm mr-1"></span>
                     }
-                    Login
+                    Submit
                 </button>
             </EditForm>
-            @if (error){
+            @if (change){
                 <p>ERROR!</p>
             }
         </div>
-    </div> *@
+    </div>
 }
 
 @code {
     protected override async Task OnInitializedAsync(){
         await refreshUserData();
     }
-    private bool init;
-    private bool loading;
-    private bool saved = false;
+    private bool init, loading, load, saved = false, change = false;
     private string token;
     private Models.UserResponse user = new Models.UserResponse();
     private Models.Pref pref = new Models.Pref();
-    
+    private Models.Passwd model = new Models.Passwd();
     private string selectedMeasurement{
         get => (pref.measurement == null) ? user.measurement : pref.measurement;
         set { pref.measurement = value; }
     }
-    List<string> units = new List<string>() { "SI", "US", "" };
-    
+    List<string> units = new List<string>() { "SI", "US", "Default" };
     private string selectedPage{
         get => (pref.defaultPage == null) ? user.defaultPage : pref.defaultPage;
         set { pref.defaultPage = value; }
     }
-    List<string> pages = new List<string>() { "Hourly", "Daily", "Account", "" };
-
+    List<string> pages = new List<string>() { "Hourly", "Daily", "Account", "Default" };
     private async Task refreshUserData(){
         init = true;
         string cookie = await JSRuntime.InvokeAsync<string>("blazorExtensions.ReadCookie",
@@ -135,24 +119,43 @@ else
             init = false;
         }
     }
-
     private async Task Save(){
         loading = true;
         if(pref.measurement == null)
             pref.measurement = user.measurement;
         if(pref.defaultPage == null)
-            pref.defaultPage = user.measurement;
+            pref.defaultPage = user.defaultPage;
         if(pref.measurement != user.measurement || pref.defaultPage != user.defaultPage){
             var saveRequest = new HttpRequestMessage(HttpMethod.Put, config["API_URL"] + "preferences");
             saveRequest.Headers.Authorization = new AuthenticationHeaderValue("Token", token);
             saveRequest.Content = new StringContent(JsonSerializer.Serialize(pref), null, "application/json");
             using var saveResponse = await Http.SendAsync(saveRequest);
-            loading = false;
             if(saveResponse.IsSuccessStatusCode){
                 saved = true;
                 await refreshUserData();
             }
         }
         loading = false;
+    }
+    private async Task Post(){
+        load = true;
+        var cond = (model.old_password != null && model.old_password != "") && (model.new_password != null && model.new_password != "");
+        if(cond && model.old_password != model.new_password){
+            var passwdRequest = new HttpRequestMessage(HttpMethod.Put, config["API_URL"] + "password");
+            passwdRequest.Headers.Authorization = new AuthenticationHeaderValue("Token", token);
+            passwdRequest.Content = new StringContent(JsonSerializer.Serialize(model), null, "application/json");
+            using var passwdResponse = await Http.SendAsync(passwdRequest);
+            if(passwdResponse.IsSuccessStatusCode){
+                var reload = new HttpRequestMessage(HttpMethod.Post, config["API_URL"] + "logoutall");
+                reload.Headers.Authorization = new AuthenticationHeaderValue("Token", token);
+                using var reloadResponse = await Http.SendAsync(reload);
+                if(reloadResponse.IsSuccessStatusCode){
+                    await JSRuntime.InvokeAsync<string>("blazorExtensions.DeleteCookie", "Authorization");
+                    NavMan.NavigateTo("/login", forceLoad: true);
+                }else
+                    change = true;
+            }
+        }
+        load = false;
     }
 }
