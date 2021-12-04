@@ -48,6 +48,9 @@
         },
         DeleteCookie: function (cname) {
             document.cookie = cname + '=; Max-Age=-99999999;';
+        },
+        Refresh: function () {
+            location.reload();
         }
     }
 </script>

@@ -40,7 +40,6 @@ else
             }
         </tbody>
     </table>
-    <button class="btn btn-primary" type="button" @onclick="Post">Post</button>
     @if (forecast_data != null){
         <div class="text-center">
             <h3>City: @City</h3>
@@ -102,8 +101,9 @@ else
         public float Longitude { get; set; }
     }
     private IEnumerable<Locations> locs = Array.Empty<Locations>();
-    protected override async Task OnInitializedAsync(){
+    protected override async Task OnParametersSetAsync(){
         await refreshList();
+        await Post();
     }
 
     private async Task refreshList(){

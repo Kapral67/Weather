@@ -8,6 +8,7 @@
 @inject HttpClient Http
 @inject Microsoft.Extensions.Configuration.IConfiguration config
 @inject IJSRuntime JSRuntime
+@inject NavigationManager NavMan
 
 @* <div class="top-row pl-4 navbar navbar-dark">
     <a class="navbar-brand" href="">Weather</a>
@@ -49,8 +50,8 @@
         @* <div class="container justify-content-center"> *@
         <div class="row">
             <div class="col-md-auto">
-                <div class="input-group mb-auto"> 
-                    <input type="text" class="form-control input-text" placeholder="City, State"
+                <div class="input-group mb-auto">
+                    <input type="text" class="form-control input-text" @onkeydown="@Enter" placeholder="@_placeholder"
                         aria-hidden="true" @bind="_Location" />
                             <div class="input-group-append">
                                 <button id="search-button" class="btn btn-primary btn-sm"
@@ -157,10 +158,11 @@
     private string NavBarCssClass => collapseNavMenu ? null : "show";
     private string NavButtonCssClass => collapseNavMenu ? "collapsed" : null;
 
-    private string _Location;
+    private string _Location, _placeholder;
 
     protected override async Task OnInitializedAsync(){
         await checkLoginStatus();
+        await setPlaceHolder();
     }
 
     private async Task checkLoginStatus(){
@@ -177,11 +179,28 @@
         pending = true;
     }
 
+    private async Task setPlaceHolder(){
+        string City = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "City");
+        string State = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "State");
+        bool cityBool = (City != null && City != "");
+        bool stateBool = (State != null && State != "");
+        if(cityBool && stateBool){
+            _placeholder = City + ", " + State;
+        }else{
+            _placeholder = "San Francisco, CA";
+        }
+    }
+
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
     }
 
+    public async Task Enter(KeyboardEventArgs e){
+        if (e.Code == "Enter" || e.Code == "NumpadEnter"){
+            await Save();
+        }
+    }
     public async Task Save(){
         if(!string.IsNullOrWhiteSpace(_Location)){
             string cleaned_location = _Location.Trim();
@@ -191,6 +210,9 @@
             _Location = City + ", " + State;
             await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "City", City);
             await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "State", State);
+            await setPlaceHolder();
+            NavMan.NavigateTo("/"+ NavMan.ToBaseRelativePath(NavMan.Uri), true);
+            @* await JSRuntime.InvokeVoidAsync("blazorExtensions.Refresh"); *@
         }
     }
 }

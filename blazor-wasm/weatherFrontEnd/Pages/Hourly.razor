@@ -12,7 +12,6 @@
 @inject IJSRuntime JSRuntime
 
 <h1>Weather forecast</h1>
-
 @if (locs == null)
 {
     <p><em>Loading...</em></p>
@@ -40,7 +39,6 @@ else
             }
         </tbody>
     </table>
-    <button class="btn btn-primary" type="button" @onclick="Post">Post</button>
     @if (forecast_data != null){
         <div class="text-center">
             <h3>City: @City</h3>
@@ -73,15 +71,17 @@ else
             </thead>
             <tbody>
                 @foreach (var loc in forecast_data.periods){
-                    <tr>
-                        <td>@loc.startTime.ToString("h:mm tt")</td>
-                        <td>@loc.temperature</td>
-                        <td>@loc.temperatureC</td>
-                        <td>@loc.windSpeed</td>
-                        <td>@loc.windDirection</td>
-                        <td>@loc.shortForecast</td>
-                        <td><img src=@loc.iconBase></td>
-                    </tr>
+                    @if ((DateTime.UtcNow - loc.startTime) < TimeSpan.FromHours(1)){
+                        <tr>
+                            <td>@loc.startTime.ToString("h:mm tt")</td>
+                            <td>@loc.temperature</td>
+                            <td>@loc.temperatureC</td>
+                            <td>@loc.windSpeed</td>
+                            <td>@loc.windDirection</td>
+                            <td>@loc.shortForecast</td>
+                            <td><img src=@loc.iconBase></td>
+                        </tr>
+                    }
                 }
             </tbody>
         </table>
@@ -96,8 +96,9 @@ else
         public float Longitude { get; set; }
     }
     private IEnumerable<Locations> locs = Array.Empty<Locations>();
-    protected override async Task OnInitializedAsync(){
+    protected override async Task OnParametersSetAsync(){
         await refreshList();
+        await Post();
     }
     private async Task refreshList(){
         locs = await Http.GetFromJsonAsync<IEnumerable<Locations>>(config["API_URL"] +
