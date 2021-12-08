@@ -1,5 +1,16 @@
 @inherits LayoutComponentBase
 
+@using System.Net.Http
+@using System.Net.Http.Json
+@using System.Net.Http.Headers
+@using System.Threading.Tasks
+@using System.Linq
+@using System.Text.Json
+
+@inject HttpClient Http
+@inject Microsoft.Extensions.Configuration.IConfiguration config
+@inject IJSRuntime JSRuntime
+
 <NavMenu />
 
 <main class="container">

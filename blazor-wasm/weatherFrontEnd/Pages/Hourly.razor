@@ -11,14 +11,13 @@
 @inject Microsoft.Extensions.Configuration.IConfiguration config
 @inject IJSRuntime JSRuntime
 
-<h1>Weather forecast</h1>
 @if (locs == null)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
-    <table class="table">
+    @* <table class="table">
         <thead>
             <tr>
                 <th>City</th>
@@ -38,14 +37,14 @@ else
                 </tr>
             }
         </tbody>
-    </table>
+    </table> *@
     @if (forecast_data != null){
-        <div class="text-center">
-            <h3>City: @City</h3>
-            <h3>State: @State</h3>
-            <p>Feet: @forecast_data.elevation.feet</p>
-            <p>Meters: @forecast_data.elevation.meters</p>
-        </div>
+        <h1>@City, @State</h1>
+        @if(US){
+            <h2>Elevation: @forecast_data.elevation.feet'</h2>
+        }else{
+            <h2>Elevation: @forecast_data.elevation.meters m</h2>
+        }
         <div class="text-right">
             @if(@age > 1){
                 <sub>Last Updated: @age hours ago.</sub>
@@ -57,7 +56,74 @@ else
                 <sub>Last Updated: less than an hour ago.</sub>
             }
         </div>
-        <table class="table">
+        @foreach (var loc in forecast_data.periods){
+            @if((DateTime.UtcNow - loc.startTime) < TimeSpan.FromHours(1)){
+                @if(loc.isDaytime){
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col">
+                                        <h3>@loc.startTime.ToString("h:mm tt")</h3>
+                                    </div>
+                                    <div class="col">
+                                        @if(US){
+                                            <h5>@loc.temperature°F</h5>
+                                            <h5>@loc.windSpeed&nbsp;@loc.windDirection</h5>
+                                        }else{
+                                            <h5>@loc.temperatureC°C</h5>
+                                            <h5>@wU(loc.windSpeed)&nbsp;@loc.windDirection</h5>
+                                        }
+                                    </div>
+                                    <div class="col">
+                                        <p>@loc.shortForecast</p>
+                                    </div>
+                                    <div class="col">
+                                        <div class="text-right">
+                                            <figure>
+                                                <img src=@loc.iconBase />
+                                            </figure>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }else{
+                    <div class="card bg-dark text-white">
+                        <div class="card-header">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col">
+                                        <h4>@loc.startTime.ToString("h:mm tt")</h4>
+                                    </div>
+                                    <div class="col">
+                                        @if(US){
+                                            <h5>@loc.temperature°F</h5>
+                                            <h5>@loc.windSpeed&nbsp;@loc.windDirection</h5>
+                                        }else{
+                                            <h5>@loc.temperatureC°C</h5>
+                                            <h5>@wU(loc.windSpeed)&nbsp;@loc.windDirection</h5>
+                                        }
+                                    </div>
+                                    <div class="col">
+                                        <h5>@loc.shortForecast</h5>
+                                    </div>
+                                    <div class="col">
+                                        <div class="text-right">
+                                            <figure>
+                                                <img src=@loc.iconBase />
+                                            </figure>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        }
+        @* <table class="table">
             <thead>
                 <tr>
                     <th>Time</th>
@@ -84,11 +150,28 @@ else
                     }
                 }
             </tbody>
-        </table>
+        </table> *@
     }
 }
 
 @code {
+    public string wU(string ws){
+        string tmp = ws.Substring(0, ws.IndexOf(" mph"));
+        int sp;
+        if((sp = tmp.IndexOf("to")) > 0){
+            string first = tmp.Substring(0, sp);
+            string second = tmp.Substring(sp+2);
+            int one = Int32.Parse(first);
+            int two = Int32.Parse(second);
+            one = (int)Math.Round((((double)one)*1.609344), MidpointRounding.ToEven);
+            two = (int)Math.Round((((double)two)*1.609344), MidpointRounding.ToEven);
+            return one.ToString() + " to " + two.ToString() + " kph";
+        }else{
+            int k = Int32.Parse(tmp);
+            k = (int)Math.Round((((double)k)*1.609344), MidpointRounding.ToEven);
+            return k.ToString() + " kph";
+        }
+    }
     public class Locations{
         public string City { get; set; }
         public string State { get; set; }
@@ -97,7 +180,7 @@ else
     }
     private IEnumerable<Locations> locs = Array.Empty<Locations>();
     protected override async Task OnParametersSetAsync(){
-        await refreshList();
+        @* await refreshList(); *@
         await Post();
     }
     private async Task refreshList(){
@@ -107,19 +190,40 @@ else
     private Metadata forecast_data;
     private string City;
     private string State;
+    private bool US;
     private TimeSpan t => (DateTimeOffset.UtcNow - forecast_data.updated);
     private int age => (int)Math.Round(t.TotalHours,0,MidpointRounding.AwayFromZero);
+    private Models.UserResponse user = new Models.UserResponse();
     private async Task Post(){
         string tmp_City = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem",
             "City");
         string tmp_State = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem",
-                "State");
+            "State");
+        string tmp_Unit = null;
+        string cookie = await JSRuntime.InvokeAsync<string>("blazorExtensions.AuthGet",
+            "Authorization");
+        if(cookie != null){
+            int i = cookie.IndexOf(" ") + 1;
+            if(i > 0){
+                string token = cookie.Substring(i);
+                var userRequest = new HttpRequestMessage(HttpMethod.Get,
+                    config["API_URL"] + "user");
+                userRequest.Headers.Authorization = new AuthenticationHeaderValue("Token", token);
+                using var userResponse = await Http.SendAsync(userRequest);
+                user = await userResponse.Content.ReadFromJsonAsync<Models.UserResponse>();
+                if(user.measurement == "SI")
+                    tmp_Unit = "SI";
+                else
+                    tmp_Unit = "US";
+            }
+        }
         var locObj = new Locations(){
             City = (tmp_City == null) ? "San Francisco" : tmp_City,
             State = (tmp_State == null) ? "CA" : tmp_State,
             Latitude = 0.0F,
             Longitude = 0.0F
         };
+        US = (tmp_Unit == "US" || tmp_Unit == null);
         City = locObj.City;
         State = locObj.State;
         var request = new HttpRequestMessage(HttpMethod.Post,
@@ -130,7 +234,7 @@ else
 
         forecast_data = await response.Content.ReadFromJsonAsync<Metadata>();
 
-        await refreshList();
+        @* await refreshList(); *@
     }
 
     public class Period{

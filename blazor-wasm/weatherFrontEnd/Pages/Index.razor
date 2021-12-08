@@ -18,7 +18,7 @@
         await Redirect();
     }
     private async Task Redirect(){
-        string cookie = await JSRuntime.InvokeAsync<string>("blazorExtensions.ReadCookie", "Authorization");
+        string cookie = await JSRuntime.InvokeAsync<string>("blazorExtensions.AuthGet", "Authorization");
         try{
             string token = cookie.Substring(cookie.IndexOf(" ") + 1);
             var prefRequest = new HttpRequestMessage(HttpMethod.Get, config["API_URL"] + "user");
@@ -30,7 +30,7 @@
                 throw new Exception();
             }
         }catch(Exception){ 
-            await JSRuntime.InvokeAsync<string>("blazorExtensions.DeleteCookie", "Authorization");
+            await JSRuntime.InvokeAsync<string>("blazorExtensions.AuthDelete", "Authorization");
         }
         string page = user.defaultPage;
         switch(page){

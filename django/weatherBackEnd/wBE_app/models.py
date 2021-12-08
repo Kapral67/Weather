@@ -25,7 +25,7 @@ class Locations(models.Model):
         ('MS', 'Mississippi'),('WI', 'Wisconsin'),('MO', 'Missouri'),('WY', 'Wyoming'),
         
         # Territories
-        ('PR', 'Puerto Rico'),
+        # ('PR', 'Puerto Rico'),
     ]
 
     City = models.CharField(max_length=64)

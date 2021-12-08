@@ -18,14 +18,14 @@
         await EndSession();
     }
     private async Task EndSession(){
-        string cookie = await JSRuntime.InvokeAsync<string>("blazorExtensions.ReadCookie", "Authorization");
+        string cookie = await JSRuntime.InvokeAsync<string>("blazorExtensions.AuthGet", "Authorization");
         try{
             string token = cookie.Substring(cookie.IndexOf(" ") + 1);
             var logoutRequest = new HttpRequestMessage(HttpMethod.Post, config["API_URL"] + "logout");
             logoutRequest.Headers.Authorization = new AuthenticationHeaderValue("Token", token);
             await Http.SendAsync(logoutRequest);
         }catch(Exception){ }
-        await JSRuntime.InvokeAsync<string>("blazorExtensions.DeleteCookie", "Authorization");
+        await JSRuntime.InvokeAsync<string>("blazorExtensions.AuthDelete", "Authorization");
         NavMan.NavigateTo("/");
     }
 }

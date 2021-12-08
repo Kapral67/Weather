@@ -102,7 +102,7 @@ else
     List<string> pages = new List<string>() { "Hourly", "Daily", "Account", "Default" };
     private async Task refreshUserData(){
         init = true;
-        string cookie = await JSRuntime.InvokeAsync<string>("blazorExtensions.ReadCookie",
+        string cookie = await JSRuntime.InvokeAsync<string>("blazorExtensions.AuthGet",
             "Authorization");
         if(cookie == null || cookie == ""){
             // User not authenticated case
@@ -150,7 +150,7 @@ else
                 reload.Headers.Authorization = new AuthenticationHeaderValue("Token", token);
                 using var reloadResponse = await Http.SendAsync(reload);
                 if(reloadResponse.IsSuccessStatusCode){
-                    await JSRuntime.InvokeAsync<string>("blazorExtensions.DeleteCookie", "Authorization");
+                    await JSRuntime.InvokeAsync<string>("blazorExtensions.AuthDelete", "Authorization");
                     NavMan.NavigateTo("/login", forceLoad: true);
                 }else
                     change = true;

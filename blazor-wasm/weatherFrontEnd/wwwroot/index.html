@@ -51,6 +51,30 @@
         },
         Refresh: function () {
             location.reload();
+        },
+        AuthGet: function (key) {
+            let stringValue = window.sessionStorage.getItem(key)
+                if(stringValue !== null){
+                    let value = JSON.parse(stringValue)
+                        let expirationDate = new Date(value.expirationDate)
+                        if(expirationDate > new Date()){
+                            return value.value
+                        } else {
+                            window.sessionStorage.removeItem(key)
+                        }
+                }
+                return null
+        },
+        AuthSet: function (key, value, expr) {
+            let expirationDate = new Date(expr)
+                let newValue = {
+                    value: value,
+                    expirationDate: expirationDate.toISOString()
+                }
+            window.sessionStorage.setItem(key, JSON.stringify(newValue))
+        },
+        AuthDelete: function (key) {
+            window.sessionStorage.removeItem(key)
         }
     }
 </script>

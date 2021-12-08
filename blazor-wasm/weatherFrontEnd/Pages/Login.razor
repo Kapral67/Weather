@@ -58,10 +58,10 @@
             using var authResponse = await Http.SendAsync(authRequest);
             auth = await authResponse.Content.ReadFromJsonAsync<Models.AuthResponse>();
             string token = "Token " + auth.token;
-            await JSRuntime.InvokeAsync<string>("blazorExtensions.WriteCookie", "Authorization",
+            await JSRuntime.InvokeAsync<string>("blazorExtensions.AuthSet", "Authorization",
                 token, auth.expiry);
             var userRequest = new HttpRequestMessage(HttpMethod.Get, config["API_URL"] + "user");
-            userRequest.Headers.Authorization = new AuthenticationHeaderValue("Token", auth.token);  
+            userRequest.Headers.Authorization = new AuthenticationHeaderValue("Token", auth.token);
             using var userResponse = await Http.SendAsync(userRequest);
             @* user = await userResponse.Content.ReadFromJsonAsync<Models.UserResponse>(); *@
             if(userResponse.IsSuccessStatusCode)

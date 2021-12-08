@@ -166,7 +166,7 @@
     }
 
     private async Task checkLoginStatus(){
-        string cookie = await JSRuntime.InvokeAsync<string>("blazorExtensions.ReadCookie", "Authorization");
+        string cookie = await JSRuntime.InvokeAsync<string>("blazorExtensions.AuthGet", "Authorization");
         try{
             string token = cookie.Substring(cookie.IndexOf(" ") + 1);
             var checkRequest = new HttpRequestMessage(HttpMethod.Get, config["API_URL"] + "user");
