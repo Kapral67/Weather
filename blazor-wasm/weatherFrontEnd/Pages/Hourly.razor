@@ -8,7 +8,6 @@
 @using System.Text.Json
 
 @inject HttpClient Http
-@inject Microsoft.Extensions.Configuration.IConfiguration config
 @inject IJSRuntime JSRuntime
 
 @if (locs == null)
@@ -183,10 +182,9 @@ else
         @* await refreshList(); *@
         await Post();
     }
-    private async Task refreshList(){
-        locs = await Http.GetFromJsonAsync<IEnumerable<Locations>>(config["API_URL"] +
-            "hourly");
-    }
+    @* private async Task refreshList(){
+        locs = await Http.GetFromJsonAsync<IEnumerable<Locations>>("hourly");
+    } *@
     private Metadata forecast_data;
     private string City;
     private string State;
@@ -206,8 +204,7 @@ else
             int i = cookie.IndexOf(" ") + 1;
             if(i > 0){
                 string token = cookie.Substring(i);
-                var userRequest = new HttpRequestMessage(HttpMethod.Get,
-                    config["API_URL"] + "user");
+                var userRequest = new HttpRequestMessage(HttpMethod.Get, "user");
                 userRequest.Headers.Authorization = new AuthenticationHeaderValue("Token", token);
                 using var userResponse = await Http.SendAsync(userRequest);
                 user = await userResponse.Content.ReadFromJsonAsync<Models.UserResponse>();
@@ -226,8 +223,7 @@ else
         US = (tmp_Unit == "US" || tmp_Unit == null);
         City = locObj.City;
         State = locObj.State;
-        var request = new HttpRequestMessage(HttpMethod.Post,
-            config["API_URL"] + "hourly");
+        var request = new HttpRequestMessage(HttpMethod.Post, "hourly");
         request.Content = new StringContent(JsonSerializer.Serialize(locObj),
             null, "application/json");
         using var response = await Http.SendAsync(request);

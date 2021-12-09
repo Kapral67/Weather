@@ -8,7 +8,6 @@
 @using System.Text.Json
 
 @inject HttpClient Http
-@inject Microsoft.Extensions.Configuration.IConfiguration config
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavMan
 
@@ -21,7 +20,7 @@
         string cookie = await JSRuntime.InvokeAsync<string>("blazorExtensions.AuthGet", "Authorization");
         try{
             string token = cookie.Substring(cookie.IndexOf(" ") + 1);
-            var prefRequest = new HttpRequestMessage(HttpMethod.Get, config["API_URL"] + "user");
+            var prefRequest = new HttpRequestMessage(HttpMethod.Get, "user");
             prefRequest.Headers.Authorization = new AuthenticationHeaderValue("Token", token);
             using var prefResponse = await Http.SendAsync(prefRequest);
             if(prefResponse.IsSuccessStatusCode){

@@ -8,7 +8,6 @@
 @using System.Text.Json
 
 @inject HttpClient Http
-@inject Microsoft.Extensions.Configuration.IConfiguration config
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavMan
 
@@ -66,7 +65,7 @@
     private async Task Create(){
         loading = true;
         if(model.password == c_password && c_password != ""){
-            var createRequest = new HttpRequestMessage(HttpMethod.Post, config["API_URL"] + "register");
+            var createRequest = new HttpRequestMessage(HttpMethod.Post, "register");
             if(model.measurement == null)
                 model.measurement = "Default";
             if(model.defaultPage == null)

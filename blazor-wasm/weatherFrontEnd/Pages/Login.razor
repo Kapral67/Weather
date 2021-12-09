@@ -8,7 +8,6 @@
 @using System.Text.Json
 
 @inject HttpClient Http
-@inject Microsoft.Extensions.Configuration.IConfiguration config
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavMan
 
@@ -52,7 +51,7 @@
     private async Task Post(){
         loading = true;
         if(model.username != null && model.password != null){
-            var authRequest = new HttpRequestMessage(HttpMethod.Post, config["API_URL"] + "login");
+            var authRequest = new HttpRequestMessage(HttpMethod.Post, "login");
             authRequest.Content = new StringContent(JsonSerializer.Serialize(model), null,
                 "application/json");
             using var authResponse = await Http.SendAsync(authRequest);
@@ -60,7 +59,7 @@
             string token = "Token " + auth.token;
             await JSRuntime.InvokeAsync<string>("blazorExtensions.AuthSet", "Authorization",
                 token, auth.expiry);
-            var userRequest = new HttpRequestMessage(HttpMethod.Get, config["API_URL"] + "user");
+            var userRequest = new HttpRequestMessage(HttpMethod.Get, "user");
             userRequest.Headers.Authorization = new AuthenticationHeaderValue("Token", auth.token);
             using var userResponse = await Http.SendAsync(userRequest);
             @* user = await userResponse.Content.ReadFromJsonAsync<Models.UserResponse>(); *@

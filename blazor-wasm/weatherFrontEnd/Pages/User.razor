@@ -8,7 +8,6 @@
 @using System.Text.Json
 
 @inject HttpClient Http
-@inject Microsoft.Extensions.Configuration.IConfiguration config
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavMan
 
@@ -110,8 +109,7 @@ else
         }else{
             // User authenticated case
             token = cookie.Substring(cookie.IndexOf(" ") + 1);
-            var userRequest = new HttpRequestMessage(HttpMethod.Get,
-                config["API_URL"] + "user");
+            var userRequest = new HttpRequestMessage(HttpMethod.Get, "user");
             userRequest.Headers.Authorization = new AuthenticationHeaderValue(
                 "Token", token);
             using var userResponse = await Http.SendAsync(userRequest);
@@ -126,7 +124,7 @@ else
         if(pref.defaultPage == null)
             pref.defaultPage = user.defaultPage;
         if(pref.measurement != user.measurement || pref.defaultPage != user.defaultPage){
-            var saveRequest = new HttpRequestMessage(HttpMethod.Put, config["API_URL"] + "preferences");
+            var saveRequest = new HttpRequestMessage(HttpMethod.Put, "preferences");
             saveRequest.Headers.Authorization = new AuthenticationHeaderValue("Token", token);
             saveRequest.Content = new StringContent(JsonSerializer.Serialize(pref), null, "application/json");
             using var saveResponse = await Http.SendAsync(saveRequest);
@@ -141,12 +139,12 @@ else
         load = true;
         var cond = (model.old_password != null && model.old_password != "") && (model.new_password != null && model.new_password != "");
         if(cond && model.old_password != model.new_password){
-            var passwdRequest = new HttpRequestMessage(HttpMethod.Put, config["API_URL"] + "password");
+            var passwdRequest = new HttpRequestMessage(HttpMethod.Put, "password");
             passwdRequest.Headers.Authorization = new AuthenticationHeaderValue("Token", token);
             passwdRequest.Content = new StringContent(JsonSerializer.Serialize(model), null, "application/json");
             using var passwdResponse = await Http.SendAsync(passwdRequest);
             if(passwdResponse.IsSuccessStatusCode){
-                var reload = new HttpRequestMessage(HttpMethod.Post, config["API_URL"] + "logoutall");
+                var reload = new HttpRequestMessage(HttpMethod.Post, "logoutall");
                 reload.Headers.Authorization = new AuthenticationHeaderValue("Token", token);
                 using var reloadResponse = await Http.SendAsync(reload);
                 if(reloadResponse.IsSuccessStatusCode){

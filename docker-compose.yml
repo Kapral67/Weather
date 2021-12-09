@@ -4,6 +4,7 @@ version: '3'
 services:
   django:
     build: ./django
+    restart: always
     volumes:
        - .:/code
     expose:
@@ -27,6 +28,7 @@ services:
   # command: dotnet run --property:Configuration=Release --no-build --project /csharp/blazor-wasm/weatherFrontEnd/weatherFrontEnd.csproj
   nginx:
     build: .
+    restart: always
     depends_on:
       - django
     # - blazor
