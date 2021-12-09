@@ -6,16 +6,34 @@ services:
     build: ./django
     volumes:
        - .:/code
-    ports:
-       - 8000:8000
-    #user: 1000:984
+    expose:
+        - 8000
+  # ports:
+    # - 8000:8000
+    user: 1001:1002
     command: python /code/django/weatherBackEnd/manage.py runserver 0.0.0.0:8000
   blazor:
     build: ./blazor-wasm
     volumes:
       - .:/csharp/
+  # expose:
+    # - 5000
+  # ports:
+    # - 5000:5000
+    # - 5001:5001
+    # - 47941:47941
+  # user: 1001:1002
+  # command: dotnet watch run --project /csharp/blazor-wasm/weatherFrontEnd/weatherFrontEnd.csproj
+  # command: dotnet run --property:Configuration=Release --no-build --project /csharp/blazor-wasm/weatherFrontEnd/weatherFrontEnd.csproj
+  nginx:
+    build: .
+    depends_on:
+      - django
+    # - blazor
     ports:
-      - 5000:5000
-      - 5001:5001
-      - 47941:47941
-    command: dotnet watch run --project /csharp/blazor-wasm/weatherFrontEnd/weatherFrontEnd.csproj
+      - 80:80
+      - 443:443
+    links:
+      - django:django
+    # - blazor:blazor
+        

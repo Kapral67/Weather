@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <RunAOTCompilation>true</RunAOTCompilation>	
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,3 +12,4 @@
   </ItemGroup>
 
 </Project>
+

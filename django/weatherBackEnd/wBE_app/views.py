@@ -28,7 +28,10 @@ from rest_auth.registration.views import RegisterView
 from wBE_app.serializers import AlterPrefsSerializer, LocationSerializer, UserSerializer, RegisterSerializer, ChangePasswordSerializer
 from wBE_app.models import Locations, Account
 
-gmaps = googlemaps.Client(key = '') # DO NOT MAKE KEY PUBLIC!
+with open('/code/django/weatherBackEnd/wBE_app/secret/geocode.txt') as f:
+    API_KEY = f.read().strip()
+
+gmaps = googlemaps.Client(key = API_KEY) # DO NOT MAKE KEY PUBLIC!
 NWS_URL = 'https://api.weather.gov/points/'
 
 #@api_view(['GET', 'POST'])
@@ -38,50 +41,52 @@ def searchLocation_API(request):
     #if request.method=='GET':
     city_query = string.capwords(request.data['City'])
     state_query = request.data['State'].upper()
-    test_query = {'City':city_query, 'State':state_query, 'Latitude':0, 'Longitude':0}
-    tmp_serializer = LocationSerializer(data = test_query)
-    if tmp_serializer.is_valid(raise_exception = True):
-        flag = True
-        lat = 0
-        lng = 0 
-        for obj in Locations.objects.all():
-            if obj.State == state_query or obj.get_State_display().upper() == state_query:
-                if obj.City == city_query:
-                    lat = round(obj.Latitude,4)
-                    lng = round(obj.Longitude,4)
-                    flag = False
-                    break
-        if flag:
-            place_query = city_query + ', ' + state_query
-            location = gmaps.geocode(place_query)
-            lat = round(location[0]['geometry']['location']['lat'],4)
-            lng = round(location[0]['geometry']['location']['lng'],4)
-        points = str(lat) + ',' + str(lng)
-        url = NWS_URL + points
-        response = urllib.request.urlopen(url)
-        encoding = response.info().get_content_charset('utf8')
-        data = json.loads(response.read().decode(encoding))
-        if flag:
-            flags = [False, False]
-            for c in location[0]['address_components']:
-                if c['types'][0] == 'locality':
-                    city = string.capwords(c['long_name'])
-                    flags[0] = True
-                elif c['types'][0] == 'administrative_area_level_1':
-                    state = c['short_name'].upper()
-                    flags[1] = True
-                if flags[0] and flags[1]:
-                    break
-            #city = data['properties']['relativeLocation']['properties']['city'].lower()
-            #state = data['properties']['relativeLocation']['properties']['state'].upper()
-            #lat = round(data['properties']['relativeLocation']['geometry']['coordinates'][1],4)
-            #lng = round(data['properties']['relativeLocation']['geometry']['coordinates'][0],4)
-            newEntry = {'City':city, 'State':state, 'Latitude':lat, 'Longitude':lng}
-            newEntry_serializer = LocationSerializer(data = newEntry)
-            if newEntry_serializer.is_valid(raise_exception = True):
-                newEntry_serializer.save()
-                #return JsonResponse("Updated Successfully",safe=False)
-        return data['properties']
+    # if(len(state_query) > 2):
+    #     state_query = state_query.title()
+    # test_query = {'City':city_query, 'State':state_query, 'Latitude':0, 'Longitude':0}
+    # tmp_serializer = LocationSerializer(data = test_query)
+    # if tmp_serializer.is_valid(raise_exception = True):
+    flag = True
+    lat = 0
+    lng = 0 
+    for obj in Locations.objects.all():
+        if obj.State == state_query or obj.get_State_display().upper() == state_query:
+            if obj.City == city_query:
+                lat = round(obj.Latitude,4)
+                lng = round(obj.Longitude,4)
+                flag = False
+                break
+    if flag:
+        place_query = city_query + ', ' + state_query
+        location = gmaps.geocode(place_query)
+        lat = round(location[0]['geometry']['location']['lat'],4)
+        lng = round(location[0]['geometry']['location']['lng'],4)
+    points = str(lat) + ',' + str(lng)
+    url = NWS_URL + points
+    response = urllib.request.urlopen(url)
+    encoding = response.info().get_content_charset('utf8')
+    data = json.loads(response.read().decode(encoding))
+    if flag:
+        flags = [False, False]
+        for c in location[0]['address_components']:
+            if c['types'][0] == 'locality':
+                city = string.capwords(c['long_name'])
+                flags[0] = True
+            elif c['types'][0] == 'administrative_area_level_1':
+                state = c['short_name'].upper()
+                flags[1] = True
+            if flags[0] and flags[1]:
+                break
+        #city = data['properties']['relativeLocation']['properties']['city'].lower()
+        #state = data['properties']['relativeLocation']['properties']['state'].upper()
+        #lat = round(data['properties']['relativeLocation']['geometry']['coordinates'][1],4)
+        #lng = round(data['properties']['relativeLocation']['geometry']['coordinates'][0],4)
+        newEntry = {'City':city, 'State':state, 'Latitude':lat, 'Longitude':lng}
+        newEntry_serializer = LocationSerializer(data = newEntry)
+        if newEntry_serializer.is_valid(raise_exception = True):
+            newEntry_serializer.save()
+            #return JsonResponse("Updated Successfully",safe=False)
+    return data['properties']
 
 @api_view(['GET', 'POST'])
 #@api_view(['GET', 'PUT'])

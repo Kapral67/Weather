@@ -3,7 +3,8 @@ RUN mkdir /csharp
 WORKDIR /csharp
 ADD ./weatherFrontEnd/. /csharp/
 WORKDIR /csharp/
-RUN dotnet build
-RUN dotnet dev-certs https
-RUN dotnet dev-certs https -ep /usr/local/share/ca-certificates/aspnet/https.crt --format PEM
-RUN update-ca-certificates
+RUN dotnet publish -c Release
+#RUN dotnet build
+#RUN dotnet dev-certs https
+#RUN dotnet dev-certs https -ep /usr/local/share/ca-certificates/aspnet/https.crt --format PEM
+#RUN update-ca-certificates
