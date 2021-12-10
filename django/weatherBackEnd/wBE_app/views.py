@@ -44,8 +44,10 @@ def searchLocation_API(request):
         city_query = "New York"
     elif(city_query == "La"):
         city_query = "Los Angeles"
-    else:
-        city_query = city_query.replace("St.", "Saint")
+    elif(city_query == "Saint Louis"):
+        city_query = "St. Louis"
+    elif(city_query == "St. Paul"):
+        city_query = "Saint Paul"
     state_query = request.data['State'].upper()
     # if(len(state_query) > 2):
     #     state_query = state_query.title()
