@@ -44,7 +44,25 @@ else
         }else{
             <h2>Elevation: @forecast_data.elevation.meters m</h2>
         }
-        <div class="text-right">
+        <sub style="text-align: left; width:49%; display: inline-block;">
+            @forecast_data.tz
+        </sub>
+        @if(@age > 1){
+            <sub style="text-align: right; width:50%; display: inline-block;">
+                Last Updated: @age hours ago.
+            </sub>
+        }
+        else if(@age == 1){
+            <sub style="text-align: right; width:50%; display: inline-block;">
+                Last Updated: 1 hour ago.
+            </sub>
+        }
+        else{
+            <sub style="text-align: right; width:50%; display: inline-block;">
+                Last Updated: &lt; 1 hour ago.
+            </sub>
+        }
+        @* <div class="text-right">
             @if(@age > 1){
                 <sub>Last Updated: @age hours ago.</sub>
             }
@@ -54,7 +72,7 @@ else
             else{
                 <sub>Last Updated: less than an hour ago.</sub>
             }
-        </div>
+        </div> *@
         @foreach (var loc in forecast_data.periods){
             @if((DateTime.UtcNow - loc.startTime) < TimeSpan.FromHours(1)){
                 @if(loc.isDaytime){
@@ -270,5 +288,7 @@ else
         public string validTimes { get; set; }
         public Elevation elevation { get; set; }
         public IEnumerable<Period> periods { get; set; }
+        public string timeZone { get; set; }
+        public string tz => timeZone.Replace('_', ' ');
     }
 }

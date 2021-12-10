@@ -56,66 +56,68 @@ else
             }
         </div>
         @foreach (var loc in forecast_data.periods){
-            @if(loc.isDaytime){
-                <div class="card">
-                    <h3 class="card-header">@loc.name</h3>
-                    <div class="card-body">
-                        <div class="container">
-                            <div class="row">
-                                <div class="col">
-                                    @if(US){
-                                        <h5>@loc.temperature°F</h5>
-                                        <h5>@loc.windSpeed&nbsp;@loc.windDirection</h5>
-                                    }else{
-                                        <h5>@loc.temperatureC°C</h5>
-                                        <h5>@wU(loc.windSpeed)&nbsp;@loc.windDirection</h5>
-                                    }
-                                </div>
-                                <div class="col">
-                                    <p>@loc.detailedForecast</p>
-                                </div>
-                                <div class="col">
-                                    <div class="text-right">
-                                        <figure>
-                                            <img src=@loc.iconLg />
-                                            <figcaption>@loc.shortForecast</figcaption>
-                                        </figure>
+            @if(loc.endTime > DateTime.UtcNow){
+                @if(loc.isDaytime){
+                    <div class="card">
+                        <h3 class="card-header">@loc.name</h3>
+                        <div class="card-body">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col">
+                                        @if(US){
+                                            <h5>@loc.temperature°F</h5>
+                                            <h5>@loc.windSpeed&nbsp;@loc.windDirection</h5>
+                                        }else{
+                                            <h5>@loc.temperatureC°C</h5>
+                                            <h5>@wU(loc.windSpeed)&nbsp;@loc.windDirection</h5>
+                                        }
+                                    </div>
+                                    <div class="col">
+                                        <p>@loc.detailedForecast</p>
+                                    </div>
+                                    <div class="col">
+                                        <div class="text-right">
+                                            <figure>
+                                                <img src=@loc.iconLg />
+                                                <figcaption>@loc.shortForecast</figcaption>
+                                            </figure>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            }else{
-                <div class="card bg-dark text-white">
-                    <h3 class="card-header">@loc.name</h3>
-                    <div class="card-body">
-                        <div class="container">
-                            <div class="row">
-                                <div class="col">
-                                    @if(US){
-                                        <h5>@loc.temperature°F</h5>
-                                        <h5>@loc.windSpeed&nbsp;@loc.windDirection</h5>
-                                    }else{
-                                        <h5>@loc.temperatureC°C</h5>
-                                        <h5>@wU(loc.windSpeed)&nbsp;@loc.windDirection</h5>
-                                    }
-                                </div>
-                                <div class="col">
-                                    <p>@loc.detailedForecast</p>
-                                </div>
-                                <div class="col">
-                                    <div class="text-right">
-                                        <figure>
-                                            <img src=@loc.iconLg/>
-                                            <figcaption>@loc.shortForecast</figcaption>
-                                        </figure>
+                }else{
+                    <div class="card bg-dark text-white">
+                        <h3 class="card-header">@loc.name</h3>
+                        <div class="card-body">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col">
+                                        @if(US){
+                                            <h5>@loc.temperature°F</h5>
+                                            <h5>@loc.windSpeed&nbsp;@loc.windDirection</h5>
+                                        }else{
+                                            <h5>@loc.temperatureC°C</h5>
+                                            <h5>@wU(loc.windSpeed)&nbsp;@loc.windDirection</h5>
+                                        }
+                                    </div>
+                                    <div class="col">
+                                        <p>@loc.detailedForecast</p>
+                                    </div>
+                                    <div class="col">
+                                        <div class="text-right">
+                                            <figure>
+                                                <img src=@loc.iconLg/>
+                                                <figcaption>@loc.shortForecast</figcaption>
+                                            </figure>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                }
             }
         }
         @* <table class="table">

@@ -40,6 +40,12 @@ NWS_URL = 'https://api.weather.gov/points/'
 def searchLocation_API(request):
     #if request.method=='GET':
     city_query = string.capwords(request.data['City'])
+    if(city_query == "New York City" or city_query == "Nyc"):
+        city_query = "New York"
+    elif(city_query == "La"):
+        city_query = "Los Angeles"
+    else:
+        city_query = city_query.replace("St.", "Saint")
     state_query = request.data['State'].upper()
     # if(len(state_query) > 2):
     #     state_query = state_query.title()
@@ -109,11 +115,14 @@ def daily_API(request):
 @csrf_exempt
 def hourly_API(request):
     if request.method == 'POST':
-        url = searchLocation_API(request)['forecastHourly']
+        whether = searchLocation_API(request)
+        url = whether['forecastHourly']
         response = urllib.request.urlopen(url)
         encoding = response.info().get_content_charset('utf8')
         data = json.loads(response.read().decode(encoding))
-        return JsonResponse(data['properties'], safe = False)
+        weather = data['properties']
+        weather.update({"timeZone": whether['timeZone']})
+        return JsonResponse(weather, safe = False)
     elif request.method == 'GET':
         locations = Locations.objects.all()
         location_serializer = LocationSerializer(locations, many = True)
