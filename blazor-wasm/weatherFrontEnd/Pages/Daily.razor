@@ -10,40 +10,51 @@
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
 
-@if (locs == null)
-{
-    <p><em>Loading...</em></p>
+@if(loading){
+    <div class="parent container d-flex align-items-center justify-content-center h-100">
+        <div class="child">
+            <span class="spinner-border spinner-border-lg mr-1"></span>
+        </div>
+    </div>
 }
-else
-{
-    @* <table class="table">
-        <thead>
-            <tr>
-                <th>City</th>
-                <th>State</th>
-                <th>Latitude</th>
-                <th>Longitude</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var loc in locs)
-            {
-                <tr>
-                    <td>@loc.City</td>
-                    <td>@loc.State</td>
-                    <td>@loc.Latitude</td>
-                    <td>@loc.Longitude</td>
-                </tr>
-            }
-        </tbody>
-    </table> *@
-    @if (forecast_data != null){
+else{
+    @if(forecast_data != null){
         <h1>@City, @State</h1>
         @if(US){
             <h2>Elevation: @forecast_data.elevation.feet'</h2>
         }else{
             <h2>Elevation: @forecast_data.elevation.meters m</h2>
         }
+    }
+    @if(alerts != null){
+        @foreach(var str in alerts){
+            <div class="alert alert-@getColor(str[2]) alert-dismissible fade show d-flex align-items-center" role="alert">
+                <div class="container">
+                    <div class="row p-1">
+                        @if(str[2] == "Minor"){
+                            <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Info:"><use xlink:href="#info-fill"/></svg>
+                        }else if(str[2] == "Moderate"){
+                            <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Warning:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+                        }else if(str[2] == "Severe" || str[2] == "Extreme"){
+                            <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+                        }else{
+                            <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Unknown:"><use xlink:href="#info-fill"/></svg>
+                        }
+                        <strong>&emsp;@str[0]</strong>
+                    </div>
+                    @if(str[1] != ""){
+                        <div class="row p-1">
+                            <p>@str[1]</p>
+                        </div>
+                    }
+                </div>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+    }
+    @if(forecast_data != null){
         <div class="text-right">
             @if(@age > 1){
                 <sub>Last Updated: @age hours ago.</sub>
@@ -120,42 +131,49 @@ else
                 }
             }
         }
-        @* <table class="table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Degrees Fahrenheit</th>
-                    <th>Degrees Celsius</th>
-                    <th>Wind Speed</th>
-                    <th>Wind Direction</th>
-                    <th>Short Forecast</th>
-                    <th>Icon</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var loc in forecast_data.periods)
-                {
-                    <tr>
-                        <td>@loc.name</td>
-                        <td>@loc.temperature</td>
-                        <td>@loc.temperatureC</td>
-                        <td>@loc.windSpeed</td>
-                        <td>@loc.windDirection</td>
-                        <td>@loc.shortForecast</td>
-                        <td>
-                            <figure>
-                                <img src=@loc.iconBase/>
-                                <figcaption>@loc.detailedForecast</figcaption>
-                            </figure>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table> *@
+    }
+    @if(error){
+        @if(!my_problem){
+            <div class="parent container d-flex align-items-center justify-content-center h-100">
+                <div class="child">
+                    <div class="alert alert-warning d-flex align-items-center" role="alert">
+                        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Warning:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+                        <div>
+                            <strong>&emsp;National Weather Service Endpoint Failure!</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }else{
+            <div class="parent container d-flex align-items-center justify-content-center h-100">
+                <div class="child">
+                    <div class="alert alert-danger d-flex align-items-center" role="alert">
+                        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+                        <div>
+                            <strong>&emsp;Whether Server Failure!</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
     }
 }
 
 @code {
+    public string getColor(string severity){
+        switch(severity){
+            case "Extreme" :
+                return "danger";
+            case "Severe" :
+                return "danger";
+            case "Moderate" :
+                return "warning";
+            case "Minor" :
+                return "primary";
+            default :
+                return "secondary";
+        }
+    }
     public string wU(string ws){
         string tmp = ws.Substring(0, ws.IndexOf(" mph"));
         int sp;
@@ -179,24 +197,17 @@ else
         public float Latitude { get; set; }
         public float Longitude { get; set; }
     }
-    private IEnumerable<Locations> locs = Array.Empty<Locations>();
     protected override async Task OnParametersSetAsync(){
-        @* await refreshList(); *@
+        loading = true;
         await Post();
+        loading = false;
     }
-
-    @* private async Task refreshList(){
-        locs = await Http.GetFromJsonAsync<IEnumerable<Locations>>("daily");
-    } *@
-
-    private Metadata forecast_data;
-    private string City;
-    private string State;
-    private bool US;
-
+    private Metadata forecast_data = null;
+    private List<List<string>> alerts = null;
+    private string City, State;
+    private bool US, loading, my_problem = true, error = false;
     private TimeSpan tspan => (DateTimeOffset.UtcNow - forecast_data.updated);
     private int age => (int)Math.Round(tspan.TotalHours,0,MidpointRounding.AwayFromZero);
-
     private Models.UserResponse user = new Models.UserResponse();
     private async Task Post(){
         string tmp_City = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem",
@@ -213,11 +224,14 @@ else
                 var userRequest = new HttpRequestMessage(HttpMethod.Get, "user");
                 userRequest.Headers.Authorization = new AuthenticationHeaderValue("Token", token);
                 using var userResponse = await Http.SendAsync(userRequest);
-                user = await userResponse.Content.ReadFromJsonAsync<Models.UserResponse>();
-                if(user.measurement == "SI")
-                    tmp_Unit = "SI";
-                else
-                    tmp_Unit = "US";
+                if(userResponse.IsSuccessStatusCode){
+                    user = await userResponse.Content.ReadFromJsonAsync<Models.UserResponse>();
+                    if(user.measurement == "SI")
+                        tmp_Unit = "SI";
+                    else
+                        tmp_Unit = "US";
+                }else
+                    await JSRuntime.InvokeVoidAsync("blazorExtensions.AuthDelete", "Authorization");
             }
         }
         var locObj = new Locations(){
@@ -233,11 +247,22 @@ else
         request.Content = new StringContent(JsonSerializer.Serialize(locObj), null,
             "application/json");
         using var response = await Http.SendAsync(request);
-        forecast_data = await response.Content.ReadFromJsonAsync<Metadata>();
-        @* Console.WriteLine(test.updated); *@
-        @* await refreshList(); *@
+        if(response.IsSuccessStatusCode)
+            forecast_data = await response.Content.ReadFromJsonAsync<Metadata>();
+        else{
+            error = true;
+            if(((Int32)response.StatusCode) == 502)
+                my_problem = false;
+        }
+        var alertRequest = new HttpRequestMessage(HttpMethod.Post, "alert");
+        alertRequest.Content = new StringContent(JsonSerializer.Serialize(locObj), null,
+            "application/json");
+        using var alertResponse = await Http.SendAsync(alertRequest);
+        Int32 alertStatus = (Int32)alertResponse.StatusCode;
+        if(alertResponse.IsSuccessStatusCode && alertStatus != 204){
+            alerts = await alertResponse.Content.ReadFromJsonAsync<List<List<string>>>();
+        }
     }
-
     public class Period{
         public int number { get; set; }
         public string name { get; set; }
@@ -258,7 +283,6 @@ else
         public string shortForecast { get; set; }
         public string detailedForecast { get; set; }
     }
-
     public class Elevation{
         public string unitCode { get; set; }
         public double value { get; set; }
@@ -266,7 +290,6 @@ else
         public float feet => (float)Math.Round((value * 3.2808398950131),2,
             MidpointRounding.ToEven);
     }
-
     public class Metadata{
         public DateTimeOffset updated { get; set; }
         public string units { get; set; }

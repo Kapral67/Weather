@@ -10,33 +10,16 @@
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
 
-@if (locs == null)
+@if (loading)
 {
-    <p><em>Loading...</em></p>
+    <div class="parent container d-flex align-items-center justify-content-center h-100">
+        <div class="child">
+            <span class="spinner-border spinner-border-lg mr-1"></span>
+        </div>
+    </div>
 }
 else
 {
-    @* <table class="table">
-        <thead>
-            <tr>
-                <th>City</th>
-                <th>State</th>
-                <th>Latitude</th>
-                <th>Longitude</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var loc in locs)
-            {
-                <tr>
-                    <td>@loc.City</td>
-                    <td>@loc.State</td>
-                    <td>@loc.Latitude</td>
-                    <td>@loc.Longitude</td>
-                </tr>
-            }
-        </tbody>
-    </table> *@
     @if (forecast_data != null){
         <h1>@City, @State</h1>
         @if(US){
@@ -62,17 +45,6 @@ else
                 Last Updated: &lt; 1 hour ago.
             </sub>
         }
-        @* <div class="text-right">
-            @if(@age > 1){
-                <sub>Last Updated: @age hours ago.</sub>
-            }
-            else if(@age == 1){
-                <sub>Last Updated: 1 hour ago.</sub>
-            }
-            else{
-                <sub>Last Updated: less than an hour ago.</sub>
-            }
-        </div> *@
         @foreach (var loc in forecast_data.periods){
             @if((DateTime.UtcNow - loc.startTime) < TimeSpan.FromHours(1)){
                 @if(loc.isDaytime){
@@ -140,34 +112,28 @@ else
                 }
             }
         }
-        @* <table class="table">
-            <thead>
-                <tr>
-                    <th>Time</th>
-                    <th>Degrees Fahrenheit</th>
-                    <th>Degrees Celsius</th>
-                    <th>Wind Speed</th>
-                    <th>Wind Direction</th>
-                    <th>Short Forecast</th>
-                    <th>Icon</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var loc in forecast_data.periods){
-                    @if ((DateTime.UtcNow - loc.startTime) < TimeSpan.FromHours(1)){
-                        <tr>
-                            <td>@loc.startTime.ToString("h:mm tt")</td>
-                            <td>@loc.temperature</td>
-                            <td>@loc.temperatureC</td>
-                            <td>@loc.windSpeed</td>
-                            <td>@loc.windDirection</td>
-                            <td>@loc.shortForecast</td>
-                            <td><img src=@loc.iconBase></td>
-                        </tr>
-                    }
-                }
-            </tbody>
-        </table> *@
+    }else if(!my_problem){
+        <div class="parent container d-flex align-items-center justify-content-center h-100">
+            <div class="child">
+                <div class="alert alert-warning d-flex align-items-center" role="alert">
+                    <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Warning:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+                    <div>
+                        <strong>&emsp;National Weather Service Endpoint Failure!</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }else{
+        <div class="parent container d-flex align-items-center justify-content-center h-100">
+            <div class="child">
+                <div class="alert alert-danger d-flex align-items-center" role="alert">
+                    <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+                    <div>
+                        <strong>&emsp;Whether Server Failure!</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
     }
 }
 
@@ -195,15 +161,13 @@ else
         public float Latitude { get; set; }
         public float Longitude { get; set; }
     }
-    private IEnumerable<Locations> locs = Array.Empty<Locations>();
+    private bool loading, my_problem = true;
     protected override async Task OnParametersSetAsync(){
-        @* await refreshList(); *@
+        loading = true;
         await Post();
+        loading = false;
     }
-    @* private async Task refreshList(){
-        locs = await Http.GetFromJsonAsync<IEnumerable<Locations>>("hourly");
-    } *@
-    private Metadata forecast_data;
+    private Metadata forecast_data = null;
     private string City;
     private string State;
     private bool US;
@@ -225,11 +189,14 @@ else
                 var userRequest = new HttpRequestMessage(HttpMethod.Get, "user");
                 userRequest.Headers.Authorization = new AuthenticationHeaderValue("Token", token);
                 using var userResponse = await Http.SendAsync(userRequest);
-                user = await userResponse.Content.ReadFromJsonAsync<Models.UserResponse>();
-                if(user.measurement == "SI")
-                    tmp_Unit = "SI";
-                else
-                    tmp_Unit = "US";
+                if(userResponse.IsSuccessStatusCode){
+                    user = await userResponse.Content.ReadFromJsonAsync<Models.UserResponse>();
+                    if(user.measurement == "SI")
+                        tmp_Unit = "SI";
+                    else
+                        tmp_Unit = "US";
+                }else
+                    await JSRuntime.InvokeVoidAsync("blazorExtensions.AuthDelete", "Authorization");
             }
         }
         var locObj = new Locations(){
@@ -245,10 +212,10 @@ else
         request.Content = new StringContent(JsonSerializer.Serialize(locObj),
             null, "application/json");
         using var response = await Http.SendAsync(request);
-
-        forecast_data = await response.Content.ReadFromJsonAsync<Metadata>();
-
-        @* await refreshList(); *@
+        if(response.IsSuccessStatusCode)
+            forecast_data = await response.Content.ReadFromJsonAsync<Metadata>();
+        else if(((Int32)response.StatusCode) == 502)
+            my_problem = false;
     }
 
     public class Period{

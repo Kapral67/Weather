@@ -9,39 +9,6 @@
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavMan
 
-@* <div class="top-row pl-4 navbar navbar-dark">
-    <a class="navbar-brand" href="">Weather</a>
-    <button class="navbar-toggler" @onclick="ToggleNavMenu">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-</div>
-
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <ul class="nav flex-column">
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-clock-fill" aria-hidden="true"></span> Hourly
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-calendar2-fill" aria-hidden="true"></span> Daily
-            </NavLink>
-        </li>
-    </ul>
-</div>
-
-@code {
-    private bool collapseNavMenu = true;
-
-    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
-    }
-} *@
-
 <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
     <div class="container-fluid">
         <a class="navbar-brand" href="">Whether</a>
@@ -62,26 +29,17 @@
                                                 <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
                                         </svg>
 
-                                        @* <i class="fas fa-search"></i> *@
                                 </button>
                             </div>
                 </div>
             </div>
         </div>
-        @* </div> *@
-
-        @*
-        <input class="form-control form-control-sm w-auto mx-auto mt-20"
-            placeholder="City, State" @bind-value="_Location"/>
-        *@
 
         <button class="navbar-toggler @NavButtonCssClass" type="button" data-bs-toggle="collapse" 
             data-bs-target="#navbarCollapse" aria-controls="navbarCollapse"
             aria-label="Toggle navigation" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
-
-        @* <div class="container justify-content-right"> *@
 
         <div class="collapse navbar-collapse @NavBarCssClass" id="navbarCollapse"
             @onclick="ToggleNavMenu">
@@ -104,47 +62,32 @@
             </div>
             @if(pending){
                 <div class="container justify-content-right">
-                    @* @if(collapseNavMenu){ *@
-                        <div class="hid text-right" style="float:right">
-                            <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                                <li class="nav-item">
-                                    @if (loggedout){
-                                        <NavLink class="nav-link active" href="/login">
-                                            <span class="bi bi-box-arrow-in-right" aria-hidden="false"></span> Login
-                                        </NavLink>
-                                    }else{
-                                        <NavLink class="nav-link active" href="/logout">
-                                            <span class="bi bi-box-arrow-left" aria-hidden="false"></span> Logoff
-                                        </NavLink>
-                                    }
-                                </li>
-                                <li class="nav-item">
-                                    @if (loggedout){
-                                        <NavLink class="nav-link active" href="/register">
-                                            <span class="bi bi-pencil-square" aria-hidden="false"></span> Register
-                                        </NavLink>
-                                    }else{
-                                        <NavLink class="nav-link active" href="/user">
-                                            <span class="bi bi-gear-wide-connected" aria-hidden="false"></span> Preferences
-                                        </NavLink>
-                                    }
-                                </li>
-                            </ul>
-                        </div>
-                    @* }else{
+                    <div class="hid text-right" style="float:right">
                         <ul class="navbar-nav me-auto mb-2 mb-md-0">
                             <li class="nav-item">
-                                <NavLink class="nav-link" href="">
-                                    <span class="bi bi-box-arrow-in-right" aria-hidden="true"></span> Login
-                                </NavLink>
+                                @if (loggedout){
+                                    <NavLink class="nav-link active" href="/login">
+                                        <span class="bi bi-box-arrow-in-right" aria-hidden="false"></span> Login
+                                    </NavLink>
+                                }else{
+                                    <NavLink class="nav-link active" href="/logout">
+                                        <span class="bi bi-box-arrow-left" aria-hidden="false"></span> Logoff
+                                    </NavLink>
+                                }
                             </li>
                             <li class="nav-item">
-                                <NavLink class="nav-link" href="">
-                                    <span class="bi bi-box-arrow-left" aria-hidden="true"></span> Logout
-                                </NavLink>
+                                @if (loggedout){
+                                    <NavLink class="nav-link active" href="/register">
+                                        <span class="bi bi-pencil-square" aria-hidden="false"></span> Register
+                                    </NavLink>
+                                }else{
+                                    <NavLink class="nav-link active" href="/user">
+                                        <span class="bi bi-gear-wide-connected" aria-hidden="false"></span> Preferences
+                                    </NavLink>
+                                }
                             </li>
                         </ul>
-                    } *@
+                    </div>
                 </div>
             }
         </div>
@@ -159,7 +102,7 @@
 
     private string _Location, _placeholder;
 
-    protected override async Task OnInitializedAsync(){
+    protected override async Task OnParametersSetAsync(){
         await checkLoginStatus();
         await setPlaceHolder();
     }

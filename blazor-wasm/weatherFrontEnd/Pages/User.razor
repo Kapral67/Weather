@@ -13,8 +13,10 @@
 
 @if(init)
 {
-    <div class="text-center">
-        <span class="spinner-border spinner-border-lg mr-1"></span>
+    <div class="parent container d-flex align-items-center justify-content-center h-100">
+        <div class="child">
+            <span class="spinner-border spinner-border-lg mr-1"></span>
+        </div>
     </div>
 }
 else
@@ -38,7 +40,7 @@ else
                     }
                 </select>
             </div>
-            <button disabled="@loading" class="btn btn-primary" @onclick="@Save">
+            <button disabled="@loading" class="@btnclass" @onclick="@Save">
                 @if(loading)
                 {
                     <span class="spinner-border spinner-border-sm mr-1"></span>
@@ -47,9 +49,6 @@ else
             </button>    
         </div>
     </div>
-    @if (saved){
-        <p>SAVED!</p>
-    }
     <div class="card">
         <h4 class="card-header">Change Password</h4>
         <div class="card-body">
@@ -65,7 +64,7 @@ else
                     <InputText @bind-Value="model.new_password" type="password" class="form-control" />
                     <ValidationMessage For="@(() => model.new_password)" />
                 </div>
-                <button disabled="@loading" class="btn btn-primary">
+                <button disabled="@loading" class="@change">
                     @if (load) 
                     {
                         <span class="spinner-border spinner-border-sm mr-1"></span>
@@ -73,19 +72,32 @@ else
                     Submit
                 </button>
             </EditForm>
-            @if (change){
-                <p>ERROR!</p>
-            }
+        </div>
+    </div>
+    <div class="container width:100%">
+        <div class="row p-4">
+            <div class="text-left">
+                <button class="@logoff" @onclick="@logoutAll">
+                    Logout Everywhere
+                </button>
+            </div>
+        </div>
+        <div class="row p-4">
+            <button class="@del" @onclick="@killUser">
+                Delete Account
+            </button>
         </div>
     </div>
 }
 
 @code {
-    protected override async Task OnInitializedAsync(){
+    protected override async Task OnParametersSetAsync(){
         await refreshUserData();
     }
-    private bool init, loading, load, saved = false, change = false;
-    private string token;
+    private bool init, loading, load;
+    private int saved = 0;
+    private string btnclass => (saved == 1) ? "btn btn-success" : (saved == -1) ? "btn btn-danger" : "btn btn-primary";
+    private string token, change = "btn btn-primary", logoff = "btn btn-warning btn-lg", del = "btn btn-danger btn-lg btn-block";
     private Models.UserResponse user = new Models.UserResponse();
     private Models.Pref pref = new Models.Pref();
     private Models.Passwd model = new Models.Passwd();
@@ -103,7 +115,7 @@ else
         init = true;
         string cookie = await JSRuntime.InvokeAsync<string>("blazorExtensions.AuthGet",
             "Authorization");
-        if(cookie == null || cookie == ""){
+        if(cookie == null || cookie.Length < 7){
             // User not authenticated case
             NavMan.NavigateTo("/login");
         }else{
@@ -129,10 +141,13 @@ else
             saveRequest.Content = new StringContent(JsonSerializer.Serialize(pref), null, "application/json");
             using var saveResponse = await Http.SendAsync(saveRequest);
             if(saveResponse.IsSuccessStatusCode){
-                saved = true;
+                saved = 1;
                 await refreshUserData();
+            }else{
+                saved = -1;
             }
-        }
+        }else
+            saved = 0;
         loading = false;
     }
     private async Task Post(){
@@ -151,9 +166,29 @@ else
                     await JSRuntime.InvokeAsync<string>("blazorExtensions.AuthDelete", "Authorization");
                     NavMan.NavigateTo("/login", forceLoad: true);
                 }else
-                    change = true;
+                    change = "btn btn-danger";
             }
         }
         load = false;
+    }
+    private async Task logoutAll(){
+        var lga = new HttpRequestMessage(HttpMethod.Post, "logoutall");
+        lga.Headers.Authorization = new AuthenticationHeaderValue("Token", token);
+        using var lgaRes = await Http.SendAsync(lga);
+        if(lgaRes.IsSuccessStatusCode){
+            await JSRuntime.InvokeAsync<string>("blazorExtensions.AuthDelete", "Authorization");
+            NavMan.NavigateTo("/login", forceLoad: true);
+        }else
+            logoff = "btn btn-outline-warning btn-lg disabled";
+    }
+    private async Task killUser(){
+        var kill = new HttpRequestMessage(HttpMethod.Delete, "user");
+        kill.Headers.Authorization = new AuthenticationHeaderValue("Token", token);
+        using var killRes = await Http.SendAsync(kill);
+        if(killRes.IsSuccessStatusCode){
+            await JSRuntime.InvokeAsync<string>("blazorExtensions.AuthDelete", "Authorization");
+            NavMan.NavigateTo("/register", forceLoad: true);
+        }else
+            del = "btn btn-outline-danger btn-lg btn-block disabled";
     }
 }

@@ -5,6 +5,7 @@ from knox import views as knox_views
 from . import views
 
 urlpatterns = [
+    path('alert', views.alert_API, name = 'alert'),
     path('daily', views.daily_API, name = 'daily'),
     path('hourly', views.hourly_API, name = 'hourly'),
     path('register', views.RegisterAPI.as_view(), name = 'register'),

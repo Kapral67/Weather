@@ -12,10 +12,20 @@
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavMan
 
-@code{
+@if(loading){
+    <div class="parent container d-flex align-items-center justify-content-center h-100">
+        <div class="child">
+            <span class="spinner-border spinner-border-lg mr-1"></span>
+        </div>
+    </div>
+}
 
-    protected override async Task OnInitializedAsync(){
+@code{
+    private bool loading;
+    protected override async Task OnParametersSetAsync(){
+        loading = true;
         await EndSession();
+        loading = false;
     }
     private async Task EndSession(){
         string cookie = await JSRuntime.InvokeAsync<string>("blazorExtensions.AuthGet", "Authorization");
