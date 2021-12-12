@@ -12,7 +12,7 @@
 @inject IJSRuntime JSRuntime
 
 @if(loading){
-    <div class="parent container d-flex align-items-center justify-content-center h-100">
+    <div class="parent container d-flex align-items-center justify-content-center h-75">
         <div class="child">
             <span class="spinner-border spinner-border-lg mr-1"></span>
         </div>
@@ -135,18 +135,23 @@ else{
     }
     @if(error){
         @if(!my_problem){
-            <div class="parent container d-flex align-items-center justify-content-center h-100">
+            <div class="parent container d-flex align-items-center justify-content-center h-75">
                 <div class="child">
                     <div class="alert alert-warning d-flex align-items-center" role="alert">
-                        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Warning:"><use xlink:href="#exclamation-triangle-fill"/></svg>
-                        <div>
-                            <strong>&emsp;National Weather Service Endpoint Failure!</strong>
+                        <div class="container">
+                            <div class="row p-1">
+                                <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Warning:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+                                <strong>&emsp;NWS Server ERROR:</strong>
+                            </div>
+                            <div class="row p-1">
+                                <p>The requested location is not supported, inoperational, or does not exist.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         }else{
-            <div class="parent container d-flex align-items-center justify-content-center h-100">
+            <div class="parent container d-flex align-items-center justify-content-center h-75">
                 <div class="child">
                     <div class="alert alert-danger d-flex align-items-center" role="alert">
                         <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>

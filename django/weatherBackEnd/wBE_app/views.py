@@ -5,7 +5,6 @@ import json
 import string
 from dateutil import parser # TimeZone handling
 
-#from django.db.models.fields import NullBooleanField
 from django.http.response import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.debug import sensitive_post_parameters
@@ -35,11 +34,9 @@ gmaps = googlemaps.Client(key = API_KEY) # DO NOT MAKE KEY PUBLIC!
 NWS_URL = 'https://api.weather.gov/points/'
 ALERT_URL = 'https://api.weather.gov/alerts/active?point='
 
-#@api_view(['GET', 'POST'])
 @parser_classes([JSONParser])
 @csrf_exempt
 def searchLocation_API(request, alert = False):
-    #if request.method=='GET':
     city_query = string.capwords(request.data['City'])
     if(city_query == "New York City" or city_query == "Nyc"):
         city_query = "New York"
@@ -54,11 +51,6 @@ def searchLocation_API(request, alert = False):
     elif(city_query == "Death Valley"):
         city_query = "Furnace Creek"
     state_query = request.data['State'].upper()
-    # if(len(state_query) > 2):
-    #     state_query = state_query.title()
-    # test_query = {'City':city_query, 'State':state_query, 'Latitude':0, 'Longitude':0}
-    # tmp_serializer = LocationSerializer(data = test_query)
-    # if tmp_serializer.is_valid(raise_exception = True):
     flag = True
     lat = 0
     lng = 0 
@@ -78,11 +70,16 @@ def searchLocation_API(request, alert = False):
     if alert:
         return points
     url = NWS_URL + points
-    response = urllib.request.urlopen(url)
+    try:
+        response = urllib.request.urlopen(url)
+    except urllib.error.HTTPError:
+        return 502
     encoding = response.info().get_content_charset('utf8')
     data = json.loads(response.read().decode(encoding))
     if flag:
         flags = [False, False]
+        city = None
+        state = None
         for c in location[0]['address_components']:
             if c['types'][0] == 'locality':
                 city = string.capwords(c['long_name'])
@@ -92,15 +89,11 @@ def searchLocation_API(request, alert = False):
                 flags[1] = True
             if flags[0] and flags[1]:
                 break
-        #city = data['properties']['relativeLocation']['properties']['city'].lower()
-        #state = data['properties']['relativeLocation']['properties']['state'].upper()
-        #lat = round(data['properties']['relativeLocation']['geometry']['coordinates'][1],4)
-        #lng = round(data['properties']['relativeLocation']['geometry']['coordinates'][0],4)
-        newEntry = {'City':city, 'State':state, 'Latitude':lat, 'Longitude':lng}
-        newEntry_serializer = LocationSerializer(data = newEntry)
-        if newEntry_serializer.is_valid(raise_exception = True):
-            newEntry_serializer.save()
-            #return JsonResponse("Updated Successfully",safe=False)
+        if city != None and city != "" and state != None and state != "" and lat != 0 and lng != 0:
+            newEntry = {'City':city, 'State':state, 'Latitude':lat, 'Longitude':lng}
+            newEntry_serializer = LocationSerializer(data = newEntry)
+            if newEntry_serializer.is_valid(raise_exception = False):
+                newEntry_serializer.save()
     return data['properties']
 
 @api_view(['POST'])
@@ -110,7 +103,10 @@ def alert_API(request):
     if request.method == 'POST':
         points = searchLocation_API(request, alert = True)
         url = ALERT_URL + points
-        response = urllib.request.urlopen(url)
+        try:
+            response = urllib.request.urlopen(url)
+        except urllib.error.HTTPError:
+            return Response(None, status = status.HTTP_502_BAD_GATEWAY)
         encoding = response.info().get_content_charset('utf8')
         data = json.loads(response.read().decode(encoding))
         if data['features'] != []:
@@ -142,13 +138,16 @@ def alert_API(request):
 @csrf_exempt
 def daily_API(request):
     if request.method == 'POST':
-        url = searchLocation_API(request)['forecast']
+        api = searchLocation_API(request)
+        if api == 502:
+            return Response(None, status = status.HTTP_502_BAD_GATEWAY)
+        url = api['forecast']
         try:
             response = urllib.request.urlopen(url)
-            encoding = response.info().get_content_charset('utf8')
-            data = json.loads(response.read().decode(encoding))
-        except:
+        except urllib.error.HTTPError:
             return Response(None, status = status.HTTP_502_BAD_GATEWAY)
+        encoding = response.info().get_content_charset('utf8')
+        data = json.loads(response.read().decode(encoding))
         return JsonResponse(data['properties'], safe = False)
     elif request.method == 'GET':
         locations = Locations.objects.all()
@@ -161,30 +160,22 @@ def daily_API(request):
 def hourly_API(request):
     if request.method == 'POST':
         whether = searchLocation_API(request)
+        if whether == 502:
+            return Response(None, status = status.HTTP_502_BAD_GATEWAY)
         url = whether['forecastHourly']
         try:
             response = urllib.request.urlopen(url)
-            encoding = response.info().get_content_charset('utf8')
-            data = json.loads(response.read().decode(encoding))
-            weather = data['properties']
-            weather.update({"timeZone": whether['timeZone']})
-        except:
+        except urllib.error.HTTPError:
             return Response(None, status = status.HTTP_502_BAD_GATEWAY)
+        encoding = response.info().get_content_charset('utf8')
+        data = json.loads(response.read().decode(encoding))
+        weather = data['properties']
+        weather.update({"timeZone": whether['timeZone']})
         return JsonResponse(weather, safe = False)
     elif request.method == 'GET':
         locations = Locations.objects.all()
         location_serializer = LocationSerializer(locations, many = True)
         return JsonResponse(location_serializer.data, safe = False)
-
-# class RegisterAPI(RegisterView):
-#     queryset = User.objects.all()
-
-# class UserAPI(APIView):
-#     @staticmethod
-#     def get(request):
-#         users = Account.objects.all()
-#         serializer = UserSerializer(users, many=True)
-#         return Response(serializer.data)
 
 class GenericUserAPI(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin,
         mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
@@ -218,10 +209,6 @@ class RegisterAPI(generics.GenericAPIView):
         if serializer.is_valid(raise_exception = False):
             serializer.save()
             return Response(serializer.data, status = status.HTTP_202_ACCEPTED)
-            # return Response({
-            #     "user": UserSerializer(user, context = self.get_serializer_context()).data,
-            #     "token": AuthToken.objects.create(user)[1]
-            # })
         else:
             return Response(serializer.errors, status = status.HTTP_418_IM_A_TEAPOT)
 
@@ -244,12 +231,6 @@ class UserAPI(generics.RetrieveAPIView, mixins.DestroyModelMixin):
     @method_decorator(csrf_exempt)
     def delete(self, request):
         return self.destroy(self.request.user)
-
-# class PreferencesAPI(generics.RetrieveAPIView):
-#     permission_classes = [permissions.IsAuthenticated,]
-#     serializer_class = PreferencesSerializer
-#     def get_object(self):
-#         return self.request.user
 
 class ChangePasswordAPI(generics.UpdateAPIView):
     serializer_class = ChangePasswordSerializer
@@ -297,7 +278,5 @@ class AlterPrefsAPI(generics.UpdateAPIView):
             self.object.defaultPage = pg
             self.object.save()
             return Response(serializer.data, status = status.HTTP_202_ACCEPTED)
-            # else:
-            #     return Response(status = status.HTTP_204_NO_CONTENT)
         else:
             return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
