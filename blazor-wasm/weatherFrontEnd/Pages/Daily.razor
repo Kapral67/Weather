@@ -255,6 +255,8 @@ else{
         using var response = await Http.SendAsync(request);
         if(response.IsSuccessStatusCode)
             forecast_data = await response.Content.ReadFromJsonAsync<Container>();
+            if(forecast_data.updateState)
+                await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "State", forecast_data.state);
         else{
             error = true;
             if(((Int32)response.StatusCode) == 502)
@@ -310,6 +312,7 @@ else{
         public Metadata weather { get; set; }
         public string city { get; set; }
         public string state { get; set; }
+        public bool updateState { get; set; }
     }
     private static readonly Regex regex = new Regex("((https://|http://|www\\.)([A-Z0-9.-:]{1,})\\.[0-9A-Z?;~&#=\\-_\\./]{2,})", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private static readonly string link = "<a href=\"{0}{1}\">{2}</a>";

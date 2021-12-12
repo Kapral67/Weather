@@ -91,7 +91,7 @@ def searchLocation_API(request, alert = False):
                 flags[1] = True
             if flags[0] and flags[1]:
                 break
-        if city != None and city != "" and state != None and state != "" and lat != 0 and lng != 0:
+        if city != None and city != "" and state != None and state != "" and lat != 0 and lng != 0 and state == state_query:
             newEntry = {'City':city, 'State':state, 'Latitude':lat, 'Longitude':lng}
             newEntry_serializer = LocationSerializer(data = newEntry)
             if newEntry_serializer.is_valid(raise_exception = False):
@@ -100,7 +100,10 @@ def searchLocation_API(request, alert = False):
         city = city_query
     if state == None or state == "":
         state = state_query
-    return [data['properties'], [city, state]]
+    if state != state_query:
+        return [data['properties'], [city, state], True]
+    else:
+        return [data['properties'], [city, state], False]
 
 @api_view(['POST'])
 @parser_classes([JSONParser])
@@ -154,7 +157,7 @@ def daily_API(request):
             return Response(None, status = status.HTTP_502_BAD_GATEWAY)
         encoding = response.info().get_content_charset('utf8')
         data = json.loads(response.read().decode(encoding))
-        return JsonResponse({"weather": data['properties'], "city": api[1][0], "state": api[1][1]}, safe = False)
+        return JsonResponse({"weather": data['properties'], "city": api[1][0], "state": api[1][1], "updateState": api[2]}, safe = False)
     elif request.method == 'GET':
         locations = Locations.objects.all()
         location_serializer = LocationSerializer(locations, many = True)
@@ -177,7 +180,7 @@ def hourly_API(request):
         data = json.loads(response.read().decode(encoding))
         weather = data['properties']
         weather.update({"timeZone": whether[0]['timeZone']})
-        return JsonResponse({"weather": weather, "city": whether[1][0], "state": whether[1][1]}, safe = False)
+        return JsonResponse({"weather": weather, "city": whether[1][0], "state": whether[1][1], "updateState": whether[2]}, safe = False)
     elif request.method == 'GET':
         locations = Locations.objects.all()
         location_serializer = LocationSerializer(locations, many = True)

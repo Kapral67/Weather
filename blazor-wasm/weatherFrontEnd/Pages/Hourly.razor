@@ -217,9 +217,11 @@ else
         request.Content = new StringContent(JsonSerializer.Serialize(locObj),
             null, "application/json");
         using var response = await Http.SendAsync(request);
-        if(response.IsSuccessStatusCode)
+        if(response.IsSuccessStatusCode){
             forecast_data = await response.Content.ReadFromJsonAsync<Container>();
-        else if(((Int32)response.StatusCode) == 502)
+            if(forecast_data.updateState)
+                await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "State", forecast_data.state);
+        }else if(((Int32)response.StatusCode) == 502)
             my_problem = false;
     }
     public class Period{
@@ -264,5 +266,6 @@ else
         public Metadata weather { get; set; }
         public string city { get; set; }
         public string state { get; set; }
+        public bool updateState { get; set; }
     }
 }
