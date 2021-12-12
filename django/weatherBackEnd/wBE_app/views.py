@@ -74,10 +74,10 @@ def searchLocation_API(request, alert = False):
     url = NWS_URL + points
     try:
         response = urllib.request.urlopen(url)
-    except urllib.error.HTTPError:
+        encoding = response.info().get_content_charset('utf8')
+        data = json.loads(response.read().decode(encoding))
+    except:
         return 502
-    encoding = response.info().get_content_charset('utf8')
-    data = json.loads(response.read().decode(encoding))
     if flag:
         flags = [False, False]
         city = None
@@ -114,10 +114,10 @@ def alert_API(request):
         url = ALERT_URL + points
         try:
             response = urllib.request.urlopen(url)
-        except urllib.error.HTTPError:
+            encoding = response.info().get_content_charset('utf8')
+            data = json.loads(response.read().decode(encoding))
+        except:
             return Response(None, status = status.HTTP_502_BAD_GATEWAY)
-        encoding = response.info().get_content_charset('utf8')
-        data = json.loads(response.read().decode(encoding))
         if data['features'] != []:
             obj = []
             for d in data['features']:
@@ -153,10 +153,10 @@ def daily_API(request):
         url = api[0]['forecast']
         try:
             response = urllib.request.urlopen(url)
-        except urllib.error.HTTPError:
+            encoding = response.info().get_content_charset('utf8')
+            data = json.loads(response.read().decode(encoding))
+        except:
             return Response(None, status = status.HTTP_502_BAD_GATEWAY)
-        encoding = response.info().get_content_charset('utf8')
-        data = json.loads(response.read().decode(encoding))
         return JsonResponse({"weather": data['properties'], "city": api[1][0], "state": api[1][1], "updateState": api[2]}, safe = False)
     elif request.method == 'GET':
         locations = Locations.objects.all()
@@ -174,10 +174,10 @@ def hourly_API(request):
         url = whether[0]['forecastHourly']
         try:
             response = urllib.request.urlopen(url)
-        except urllib.error.HTTPError:
+            encoding = response.info().get_content_charset('utf8')
+            data = json.loads(response.read().decode(encoding))
+        except:
             return Response(None, status = status.HTTP_502_BAD_GATEWAY)
-        encoding = response.info().get_content_charset('utf8')
-        data = json.loads(response.read().decode(encoding))
         weather = data['properties']
         weather.update({"timeZone": whether[0]['timeZone']})
         return JsonResponse({"weather": weather, "city": whether[1][0], "state": whether[1][1], "updateState": whether[2]}, safe = False)
