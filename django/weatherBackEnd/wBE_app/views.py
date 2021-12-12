@@ -38,19 +38,23 @@ ALERT_URL = 'https://api.weather.gov/alerts/active?point='
 @csrf_exempt
 def searchLocation_API(request, alert = False):
     city_query = string.capwords(request.data['City'])
-    if(city_query == "New York City" or city_query == "Nyc"):
-        city_query = "New York"
-    elif(city_query == "La"):
-        city_query = "Los Angeles"
-    elif(city_query == "Saint Louis"):
-        city_query = "St. Louis"
-    elif(city_query == "St. Paul"):
-        city_query = "Saint Paul"
-    elif(city_query == "Tahoe" or city_query == "Lake Tahoe"):
-        city_query = "Tahoe City"
-    elif(city_query == "Death Valley"):
-        city_query = "Furnace Creek"
     state_query = request.data['State'].upper()
+    if((city_query == "New York City" or city_query == "Nyc") and (state_query == "NY" or state_query == "NEW YORK")):
+        city_query = "New York"
+    elif((city_query == "La") and (state_query == "CA" or state_query == "CALIFORNIA")):
+        city_query = "Los Angeles"
+    elif((city_query == "Saint Louis") and (state_query == "MO" or state_query == "MISSOURI")):
+        city_query = "St. Louis"
+    elif((city_query == "St. Paul") and (state_query == "MN" or state_query == "MINNESOTA")):
+        city_query = "Saint Paul"
+    elif((city_query == "Tahoe" or city_query == "Lake Tahoe") and (state_query == "CA" or state_query == "CALIFORNIA")):
+        city_query = "Tahoe City"
+    elif((city_query == "Tahoe" or city_query == "Lake Tahoe") and (state_query == "NV" or state_query == "NEVADA")):
+        city_query = "Incline Village"
+    elif((city_query == "Death Valley") and (state_query == "CA" or state_query == "CALIFORNIA")):
+        city_query = "Furnace Creek"
+    elif((city_query == "Staten Island" or city_query == "Brooklyn" or city_query == "Queens" or city_query == "Bronx" or city_query == "Manhattan") and (state_query == "NY" or "NEW YORK")):
+        city_query = "New York"
     flag = True
     lat = 0
     lng = 0 
@@ -65,9 +69,12 @@ def searchLocation_API(request, alert = False):
                 break
     if flag:
         place_query = city_query + ', ' + state_query
-        location = gmaps.geocode(place_query)
-        lat = round(location[0]['geometry']['location']['lat'],4)
-        lng = round(location[0]['geometry']['location']['lng'],4)
+        try:
+            location = gmaps.geocode(place_query)
+            lat = round(location[0]['geometry']['location']['lat'],4)
+            lng = round(location[0]['geometry']['location']['lng'],4)
+        except:
+            return 502
     points = str(lat) + ',' + str(lng)
     if alert:
         return points
@@ -82,16 +89,18 @@ def searchLocation_API(request, alert = False):
         flags = [False, False]
         city = None
         state = None
+        full_state = None
         for c in location[0]['address_components']:
             if c['types'][0] == 'locality':
                 city = string.capwords(c['long_name'])
                 flags[0] = True
             elif c['types'][0] == 'administrative_area_level_1':
                 state = c['short_name'].upper()
+                full_state = c['long_name'].upper()
                 flags[1] = True
             if flags[0] and flags[1]:
                 break
-        if city != None and city != "" and state != None and state != "" and lat != 0 and lng != 0 and state == state_query:
+        if city != None and city != "" and state != None and state != "" and lat != 0 and lng != 0 and full_state != None and full_state != "" and (state == state_query or full_state == state_query):
             newEntry = {'City':city, 'State':state, 'Latitude':lat, 'Longitude':lng}
             newEntry_serializer = LocationSerializer(data = newEntry)
             if newEntry_serializer.is_valid(raise_exception = False):
@@ -111,6 +120,8 @@ def searchLocation_API(request, alert = False):
 def alert_API(request):
     if request.method == 'POST':
         points = searchLocation_API(request, alert = True)
+        if points == 502:
+            return Response(None, status = status.HTTP_502_BAD_GATEWAY)
         url = ALERT_URL + points
         try:
             response = urllib.request.urlopen(url)
@@ -199,9 +210,6 @@ class GenericUserAPI(generics.GenericAPIView, mixins.ListModelMixin, mixins.Crea
             return self.retrieve(request)
         else:
             return self.list(request)
-
-    # def post(self, request):
-    #     return self.create(request)
     @method_decorator(csrf_exempt)
     def put(self, request):
         return self.update(request, id)
