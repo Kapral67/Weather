@@ -20,11 +20,11 @@
 }
 else{
     @if(forecast_data != null){
-        <h1>@City, @State</h1>
+        <h1>@forecast_data.city, @forecast_data.state</h1>
         @if(US){
-            <h2>Elevation: @forecast_data.elevation.feet'</h2>
+            <h2>Elevation: @forecast_data.weather.elevation.feet'</h2>
         }else{
-            <h2>Elevation: @forecast_data.elevation.meters m</h2>
+            <h2>Elevation: @forecast_data.weather.elevation.meters m</h2>
         }
     }
     @if(alerts != null){
@@ -67,7 +67,7 @@ else{
                 <sub>Last Updated: less than an hour ago.</sub>
             }
         </div>
-        @foreach (var loc in forecast_data.periods){
+        @foreach (var loc in forecast_data.weather.periods){
             @if(loc.endTime > DateTime.UtcNow){
                 @if(loc.isDaytime){
                     <div class="card">
@@ -208,11 +208,11 @@ else{
         await Post();
         loading = false;
     }
-    private Metadata forecast_data = null;
+    private Container forecast_data = null;
     private List<List<string>> alerts = null;
     private string City, State;
     private bool US, loading, my_problem = true, error = false;
-    private TimeSpan tspan => (DateTimeOffset.UtcNow - forecast_data.updated);
+    private TimeSpan tspan => (DateTimeOffset.UtcNow - forecast_data.weather.updated);
     private int age => (int)Math.Round(tspan.TotalHours,0,MidpointRounding.AwayFromZero);
     private Models.UserResponse user = new Models.UserResponse();
     private async Task Post(){
@@ -254,7 +254,7 @@ else{
             "application/json");
         using var response = await Http.SendAsync(request);
         if(response.IsSuccessStatusCode)
-            forecast_data = await response.Content.ReadFromJsonAsync<Metadata>();
+            forecast_data = await response.Content.ReadFromJsonAsync<Container>();
         else{
             error = true;
             if(((Int32)response.StatusCode) == 502)
@@ -305,6 +305,11 @@ else{
         public string validTimes { get; set; }
         public Elevation elevation { get; set; }
         public IEnumerable<Period> periods { get; set; }
+    }
+    public class Container{
+        public Metadata weather { get; set; }
+        public string city { get; set; }
+        public string state { get; set; }
     }
     private static readonly Regex regex = new Regex("((https://|http://|www\\.)([A-Z0-9.-:]{1,})\\.[0-9A-Z?;~&#=\\-_\\./]{2,})", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private static readonly string link = "<a href=\"{0}{1}\">{2}</a>";

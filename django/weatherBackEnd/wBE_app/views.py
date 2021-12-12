@@ -59,6 +59,8 @@ def searchLocation_API(request, alert = False):
             if obj.City == city_query:
                 lat = round(obj.Latitude,4)
                 lng = round(obj.Longitude,4)
+                city = obj.City
+                state = obj.State
                 flag = False
                 break
     if flag:
@@ -94,7 +96,11 @@ def searchLocation_API(request, alert = False):
             newEntry_serializer = LocationSerializer(data = newEntry)
             if newEntry_serializer.is_valid(raise_exception = False):
                 newEntry_serializer.save()
-    return data['properties']
+    if city == None or city == "":
+        city = city_query
+    if state == None or state == "":
+        state = state_query
+    return [data['properties'], [city, state]]
 
 @api_view(['POST'])
 @parser_classes([JSONParser])
@@ -141,14 +147,14 @@ def daily_API(request):
         api = searchLocation_API(request)
         if api == 502:
             return Response(None, status = status.HTTP_502_BAD_GATEWAY)
-        url = api['forecast']
+        url = api[0]['forecast']
         try:
             response = urllib.request.urlopen(url)
         except urllib.error.HTTPError:
             return Response(None, status = status.HTTP_502_BAD_GATEWAY)
         encoding = response.info().get_content_charset('utf8')
         data = json.loads(response.read().decode(encoding))
-        return JsonResponse(data['properties'], safe = False)
+        return JsonResponse({"weather": data['properties'], "city": api[1][0], "state": api[1][1]}, safe = False)
     elif request.method == 'GET':
         locations = Locations.objects.all()
         location_serializer = LocationSerializer(locations, many = True)
@@ -162,7 +168,7 @@ def hourly_API(request):
         whether = searchLocation_API(request)
         if whether == 502:
             return Response(None, status = status.HTTP_502_BAD_GATEWAY)
-        url = whether['forecastHourly']
+        url = whether[0]['forecastHourly']
         try:
             response = urllib.request.urlopen(url)
         except urllib.error.HTTPError:
@@ -170,8 +176,8 @@ def hourly_API(request):
         encoding = response.info().get_content_charset('utf8')
         data = json.loads(response.read().decode(encoding))
         weather = data['properties']
-        weather.update({"timeZone": whether['timeZone']})
-        return JsonResponse(weather, safe = False)
+        weather.update({"timeZone": whether[0]['timeZone']})
+        return JsonResponse({"weather": weather, "city": whether[1][0], "state": whether[1][1]}, safe = False)
     elif request.method == 'GET':
         locations = Locations.objects.all()
         location_serializer = LocationSerializer(locations, many = True)

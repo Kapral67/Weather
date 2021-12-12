@@ -21,14 +21,14 @@
 else
 {
     @if (forecast_data != null){
-        <h1>@City, @State</h1>
+        <h1>@forecast_data.city, @forecast_data.state</h1>
         @if(US){
-            <h2>Elevation: @forecast_data.elevation.feet'</h2>
+            <h2>Elevation: @forecast_data.weather.elevation.feet'</h2>
         }else{
-            <h2>Elevation: @forecast_data.elevation.meters m</h2>
+            <h2>Elevation: @forecast_data.weather.elevation.meters m</h2>
         }
         <sub style="text-align: left; width:49%; display: inline-block;">
-            @forecast_data.tz
+            @forecast_data.weather.tz
         </sub>
         @if(@age > 1){
             <sub style="text-align: right; width:50%; display: inline-block;">
@@ -45,7 +45,7 @@ else
                 Last Updated: &lt; 1 hour ago.
             </sub>
         }
-        @foreach (var loc in forecast_data.periods){
+        @foreach (var loc in forecast_data.weather.periods){
             @if((DateTime.UtcNow - loc.startTime) < TimeSpan.FromHours(1)){
                 @if(loc.isDaytime){
                     <div class="card">
@@ -172,11 +172,11 @@ else
         await Post();
         loading = false;
     }
-    private Metadata forecast_data = null;
+    private Container forecast_data = null;
     private string City;
     private string State;
     private bool US;
-    private TimeSpan t => (DateTimeOffset.UtcNow - forecast_data.updated);
+    private TimeSpan t => (DateTimeOffset.UtcNow - forecast_data.weather.updated);
     private int age => (int)Math.Round(t.TotalHours,0,MidpointRounding.AwayFromZero);
     private Models.UserResponse user = new Models.UserResponse();
     private async Task Post(){
@@ -218,11 +218,10 @@ else
             null, "application/json");
         using var response = await Http.SendAsync(request);
         if(response.IsSuccessStatusCode)
-            forecast_data = await response.Content.ReadFromJsonAsync<Metadata>();
+            forecast_data = await response.Content.ReadFromJsonAsync<Container>();
         else if(((Int32)response.StatusCode) == 502)
             my_problem = false;
     }
-
     public class Period{
         public int number { get; set; }
         public string name { get; set; }
@@ -242,7 +241,6 @@ else
         public string shortForecast { get; set; }
         public string detailedForecast { get; set; }
     }
-
     public class Elevation{
         public string unitCode { get; set; }
         public double value { get; set; }
@@ -250,7 +248,6 @@ else
         public float feet => (float)Math.Round((value * 3.2808398950131),2,
             MidpointRounding.ToEven);
     }
-
     public class Metadata{
         public DateTimeOffset updated { get; set; }
         public string units { get; set; }
@@ -262,5 +259,10 @@ else
         public IEnumerable<Period> periods { get; set; }
         public string timeZone { get; set; }
         public string tz => timeZone.Replace('_', ' ');
+    }
+    public class Container{
+        public Metadata weather { get; set; }
+        public string city { get; set; }
+        public string state { get; set; }
     }
 }
