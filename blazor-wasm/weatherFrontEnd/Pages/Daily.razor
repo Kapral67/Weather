@@ -45,9 +45,7 @@ else{
                     </div>
                     @if(str[1] != ""){
                         <div class="row p-2">
-                            @* <div class="text-left"> *@
-                                <p>@((MarkupString)ResolveLinks(toHtml(str[1])))</p>
-                            @* </div> *@
+                            <p>@((MarkupString)ResolveLinks(toHtml(str[1])))</p>
                         </div>
                     }
                 </div>

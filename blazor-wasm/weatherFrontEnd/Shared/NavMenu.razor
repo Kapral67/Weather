@@ -12,8 +12,6 @@
 <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
     <div class="container-fluid">
         <a class="navbar-brand" href="">Whether</a>
-
-        @* <div class="container justify-content-center"> *@
         <div class="row">
             <div class="col-md-auto">
                 <div class="input-group mb-auto">
@@ -154,7 +152,6 @@
             await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "State", State);
             await setPlaceHolder();
             NavMan.NavigateTo("/"+ NavMan.ToBaseRelativePath(NavMan.Uri), true);
-            @* await JSRuntime.InvokeVoidAsync("blazorExtensions.Refresh"); *@
         }
     }
 }
