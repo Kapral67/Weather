@@ -44,10 +44,10 @@ else{
                         <strong>&emsp;@str[0]</strong>
                     </div>
                     @if(str[1] != ""){
-                        <div class="row p-1 justify-content-center">
-                            <div class="text-left">
+                        <div class="row p-2">
+                            @* <div class="text-left"> *@
                                 <p>@((MarkupString)ResolveLinks(toHtml(str[1])))</p>
-                            </div>
+                            @* </div> *@
                         </div>
                     }
                 </div>
