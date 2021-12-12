@@ -44,8 +44,10 @@ else{
                         <strong>&emsp;@str[0]</strong>
                     </div>
                     @if(str[1] != ""){
-                        <div class="row p-1">
-                            <p>@((MarkupString)ResolveLinks(toHtml(str[1])))</p>
+                        <div class="row p-1 justify-content-center">
+                            <div class="text-left">
+                                <p>@((MarkupString)ResolveLinks(toHtml(str[1])))</p>
+                            </div>
                         </div>
                     }
                 </div>
@@ -348,7 +350,7 @@ else{
         return url;
     }
     private static string toHtml(string content){
-        content = content.Replace("\n", "<br />");
+        content = content.Replace("\n\n", "<br /><br />");
         return content;
     }
 }
