@@ -6,19 +6,28 @@
 - Locations are Geocoded using the google maps API in the backend (django)
 
 - This app is intended to run and has been tested on Ubuntu-20.04-focal LTS amd64
-- To Run:
-Setting Up Django:
+
+## Running, Complete Following in Order:
+
+#### Setting Up Django:
+
    - `docker-compose build django`
    - `docker-compose run django /bin/bash`
       - `cd django/weatherBackEnd`
       - `python manage.py makemigrations && python manage.py migrate`
-Setting Up Blazor:
+
+#### Setting Up Blazor:
+
    - `docker-compose build blazor`
    - `docker-compose run blazor /bin/bash`
       - `cd blazor-wasm/weatherFrontEnd`
       - `dotnet publish -c Release`
       - `chmod -R 777 bin && chmod -R 777 obj`
-Setting Up Nginx:
+
+#### Setting Up Nginx:
+
    - `docker-compose build nginx`
-Running:
+
+#### Running:
+
    - `docker-compose up` or `docker-compose up -d`
