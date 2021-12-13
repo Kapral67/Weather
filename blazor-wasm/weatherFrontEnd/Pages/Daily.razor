@@ -20,11 +20,11 @@
 }
 else{
     @if(forecast_data != null){
-        <h1>@forecast_data.city, @forecast_data.state</h1>
+        <h2>@forecast_data.city, @forecast_data.state</h2>
         @if(US){
-            <h2>Elevation: @forecast_data.weather.elevation.feet'</h2>
+            <h3>Elevation: @forecast_data.weather.elevation.feet'</h3>
         }else{
-            <h2>Elevation: @forecast_data.weather.elevation.meters m</h2>
+            <h3>Elevation: @forecast_data.weather.elevation.meters m</h3>
         }
     }
     @if(alerts != null){
@@ -71,7 +71,7 @@ else{
             @if(loc.endTime > DateTime.UtcNow){
                 @if(loc.isDaytime){
                     <div class="card">
-                        <h3 class="card-header">@loc.name</h3>
+                        <h4 class="card-header">@loc.name</h4>
                         <div class="card-body">
                             <div class="container">
                                 <div class="row">
@@ -101,7 +101,7 @@ else{
                     </div>
                 }else{
                     <div class="card bg-dark text-white">
-                        <h3 class="card-header">@loc.name</h3>
+                        <h4 class="card-header">@loc.name</h4>
                         <div class="card-body">
                             <div class="container">
                                 <div class="row">

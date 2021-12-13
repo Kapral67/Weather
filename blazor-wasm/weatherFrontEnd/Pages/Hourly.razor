@@ -21,11 +21,11 @@
 else
 {
     @if (forecast_data != null){
-        <h1>@forecast_data.city, @forecast_data.state</h1>
+        <h2>@forecast_data.city, @forecast_data.state</h2>
         @if(US){
-            <h2>Elevation: @forecast_data.weather.elevation.feet'</h2>
+            <h3>Elevation: @forecast_data.weather.elevation.feet'</h3>
         }else{
-            <h2>Elevation: @forecast_data.weather.elevation.meters m</h2>
+            <h3>Elevation: @forecast_data.weather.elevation.meters m</h3>
         }
         <sub style="text-align: left; width:49%; display: inline-block;">
             @forecast_data.weather.tz
@@ -53,7 +53,7 @@ else
                             <div class="container">
                                 <div class="row">
                                     <div class="col">
-                                        <h3>@loc.startTime.ToString("h:mm tt")</h3>
+                                        <h4>@loc.startTime.ToString("h:mm tt")</h4>
                                     </div>
                                     <div class="col">
                                         @if(US){
@@ -65,7 +65,7 @@ else
                                         }
                                     </div>
                                     <div class="col">
-                                        <p>@loc.shortForecast</p>
+                                        <h5>@loc.shortForecast</h5>
                                     </div>
                                     <div class="col">
                                         <div class="text-right">
