@@ -23,7 +23,7 @@ on:
 jobs:
   analyze:
     name: Analyze
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-focal
     permissions:
       actions: read
       contents: read
@@ -70,7 +70,7 @@ jobs:
          sudo apt-get install -y apt-transport-https && \
          sudo apt-get update && \
          sudo apt-get install -y dotnet-sdk-6.0
-       dotnet workload install wasm-tools
+       sudo dotnet workload install wasm-tools
          
     - name: Autobuild
       uses: github/codeql-action/autobuild@v1
