@@ -1,4 +1,4 @@
-# Whether README
+![Whether](https://socialify.git.ci/Kapral67/Whether/image?font=Inter&logo=https%3A%2F%2Fwhether.maxkapral.com%2Ficon-512.png&pattern=Solid&theme=Light)
 - Blazor Site Accessible at https://whether.maxkapral.com (weather.maxkapral.com is setup as a redirect as well)
 - Django-REST API is hosted at https://cdn.maxkapral.com
 - Django Backend uses Django-REST to serve content and store locations as well as user accounts
