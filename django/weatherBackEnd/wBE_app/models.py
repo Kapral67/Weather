@@ -38,33 +38,7 @@ class Locations(models.Model):
             models.UniqueConstraint(fields=['Latitude', 'Longitude'], name='Unique Location')
         ]
 
-# class UserPref(models.Model):
-#     METRIC = [('SI', 'Metric'), ('US', 'Customary')]
-#     PAGE = [('Hour', 'hourly'), ('Day', 'daily'), ('User', 'account')]
-#     user = models.OneToOneField(User, on_delete=models.CASCADE)
-#     measurement = models.CharField(choices=METRIC, max_length=10, blank=True)
-#     defaultPage = models.CharField(choices=PAGE, max_length=10, blank=True)
-
 class AccountManager(BaseUserManager):
-    # def _create_user(self, email, password=None):
-    #     if not email:
-    #         raise ValueError("Email Address is Required.")
-    #     user = self.model(
-    #         email=self.normalize_email(email),
-    #     )
-    #     user.set_password(password)
-    #     user.save(using=self._db)
-    #     return user
-    # def create_superuser(self, email, password):
-    #     user = self.create_user(
-    #         email=self.normalize_email(email),
-    #         password=password,
-    #     )
-    #     user.is_admin=True
-    #     user.is_staff=True
-    #     user.is_superuser=True
-    #     user.save(using=self._db)
-    #     return user
 
     use_in_migrations = True
 
@@ -100,12 +74,6 @@ class AccountManager(BaseUserManager):
 class Account(AbstractUser):
     email = models.EmailField(verbose_name="email", max_length=60, unique=True)
     username = None
-    # date_joined = models.DateTimeField(verbose_name="date joined", auto_now_add=True)
-    # last_login = models.DateTimeField(verbose_name="last login", auto_now=True)
-    # is_admin = models.BooleanField(default=False)
-    # is_active = models.BooleanField(default=True)
-    # is_staff = models.BooleanField(default=False)
-    # is_superuser = models.BooleanField(default=False)
     METRIC = [('SI', 'SI'), ('US', 'US'), ('Default', 'Default')]
     measurement = models.CharField(choices=METRIC, max_length=16, blank=True)
     PAGE = [('Hourly', 'Hourly'), ('Daily', 'Daily'), ('Account', 'Account'), ('Default', 'Default')]

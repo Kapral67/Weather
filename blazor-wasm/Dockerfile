@@ -6,7 +6,8 @@ WORKDIR /csharp/
 RUN apt-get update -y
 RUN apt-get install -y python3
 RUN dotnet workload install wasm-tools
-RUN dotnet clean
+#RUN dotnet build
+#RUN dotnet clean
 #RUN dotnet publish -c Release
 #RUN dotnet dev-certs https
 #RUN dotnet dev-certs https -ep /usr/local/share/ca-certificates/aspnet/https.crt --format PEM

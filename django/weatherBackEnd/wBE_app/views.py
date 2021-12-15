@@ -1,28 +1,28 @@
-from django.views.decorators import csrf
+# from django.views.decorators import csrf
 import googlemaps
 import urllib.request
 import json
 import string
-from dateutil import parser # TimeZone handling
+# from dateutil import parser # TimeZone handling
 
 from django.http.response import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.debug import sensitive_post_parameters
+# from django.views.decorators.debug import sensitive_post_parameters
 from django.contrib.auth import login
 from django.utils.decorators import method_decorator
 
 from rest_framework import generics, permissions, status, mixins
-from rest_framework.decorators import api_view, parser_classes, permission_classes
+from rest_framework.decorators import api_view, parser_classes#, permission_classes
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
-from rest_framework.serializers import Serializer
-from rest_framework.views import APIView
+# from rest_framework.serializers import Serializer
+# from rest_framework.views import APIView
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 
 from knox.views import LoginView as KnoxLoginView
-from knox.models import AuthToken
+# from knox.models import AuthToken
 
-from rest_auth.registration.views import RegisterView
+# from rest_auth.registration.views import RegisterView
 
 from wBE_app.serializers import AlterPrefsSerializer, LocationSerializer, UserSerializer, RegisterSerializer, ChangePasswordSerializer
 from wBE_app.models import Locations, Account

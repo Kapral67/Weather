@@ -27,7 +27,10 @@ services:
   # command: dotnet watch run --project /csharp/blazor-wasm/weatherFrontEnd/weatherFrontEnd.csproj
   # command: dotnet run --property:Configuration=Release --no-build --project /csharp/blazor-wasm/weatherFrontEnd/weatherFrontEnd.csproj
   nginx:
-    build: .
+    build:
+      context: .
+      args:
+        ENABLED_MODULES: brotli
     restart: always
     depends_on:
       - django
@@ -38,4 +41,3 @@ services:
     links:
       - django:django
     # - blazor:blazor
-        
