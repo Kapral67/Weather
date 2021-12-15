@@ -43,9 +43,9 @@ def searchLocation_API(request, alert = False):
         city_query = "New York"
     elif((city_query == "La") and (state_query == "CA" or state_query == "CALIFORNIA")):
         city_query = "Los Angeles"
-    elif((city_query == "Saint Louis") and (state_query == "MO" or state_query == "MISSOURI")):
+    elif((city_query == "Saint Louis" or city_query == "St Louis") and (state_query == "MO" or state_query == "MISSOURI")):
         city_query = "St. Louis"
-    elif((city_query == "St. Paul") and (state_query == "MN" or state_query == "MINNESOTA")):
+    elif((city_query == "St. Paul" or city_query == "St Paul") and (state_query == "MN" or state_query == "MINNESOTA")):
         city_query = "Saint Paul"
     elif((city_query == "Tahoe" or city_query == "Lake Tahoe") and (state_query == "CA" or state_query == "CALIFORNIA")):
         city_query = "Tahoe City"
