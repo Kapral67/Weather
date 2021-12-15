@@ -65,7 +65,9 @@ jobs:
     - run: |
        docker-compose build blazor
        docker-compose run blazor /bin/bash
+       cd blazor-wasm/weatherFrontEnd
        dotnet build
+       exit
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
