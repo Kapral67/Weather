@@ -55,6 +55,8 @@ def searchLocation_API(request, alert = False):
         city_query = "Furnace Creek"
     elif((city_query == "Staten Island" or city_query == "Brooklyn" or city_query == "Queens" or city_query == "Bronx" or city_query == "Manhattan") and (state_query == "NY" or "NEW YORK")):
         city_query = "New York"
+    elif((city_query == "Redwood" or city_query == "Rwc") and (state_query == "CA" or "CALIFORNIA")):
+        city_query = "Redwood City"
     flag = True
     lat = 0
     lng = 0 
