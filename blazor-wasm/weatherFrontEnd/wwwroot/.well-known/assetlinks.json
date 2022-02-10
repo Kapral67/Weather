@@ -1,0 +1,12 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.maxkapral.whether.twa",
+        "sha256_cert_fingerprints":[
+              "E2:81:7F:16:7A:19:C2:58:B6:0E:BF:11:0E:2D:C8:32:26:C6:37:FC:BE:4A:5E:11:5D:78:FA:65:60:16:A9:1A",
+              "AD:3A:4B:42:1A:A9:50:01:72:63:5A:F3:AF:38:3E:D7:53:23:B0:13:58:CF:D5:D8:E4:E8:6E:49:AE:E1:61:96"
+        ]
+       }
+    }
+]
