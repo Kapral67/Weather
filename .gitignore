@@ -242,6 +242,7 @@ bin/
 
 *.old
 
-nginx/ssl/*.pem
+*.pem
+nginx/ssl/archive
 secret/
 obj/
