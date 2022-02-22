@@ -8,5 +8,5 @@ googlemaps==4.6.0
 python-dateutil==2.8.2
 django-rest-knox==4.2.0
 django-rest-auth==0.9.5
-django-allauth==0.48.0
+django-allauth==0.49.0
 
