@@ -1,6 +1,6 @@
 # from django.views.decorators import csrf
 import googlemaps
-import urllib.request
+import requests
 import json
 import string
 # from dateutil import parser # TimeZone handling
@@ -82,9 +82,10 @@ def searchLocation_API(request, alert = False):
         return points
     url = NWS_URL + points
     try:
-        response = urllib.request.urlopen(url)
-        encoding = response.info().get_content_charset('utf8')
-        data = json.loads(response.read().decode(encoding))
+        response = requests.get(url)
+        if response.status_code >= 400:
+            raise Exception('FAILURE!')
+        data = response.json()
     except:
         return 502
     if flag:
@@ -126,9 +127,10 @@ def alert_API(request):
             return Response(None, status = status.HTTP_502_BAD_GATEWAY)
         url = ALERT_URL + points
         try:
-            response = urllib.request.urlopen(url)
-            encoding = response.info().get_content_charset('utf8')
-            data = json.loads(response.read().decode(encoding))
+            response = requests.get(url)
+            if response.status_code >= 400:
+                raise Exception('FAILURE!')
+            data = response.json()
         except:
             return Response(None, status = status.HTTP_502_BAD_GATEWAY)
         if data['features'] != []:
@@ -165,9 +167,10 @@ def daily_API(request):
             return Response(None, status = status.HTTP_502_BAD_GATEWAY)
         url = api[0]['forecast']
         try:
-            response = urllib.request.urlopen(url)
-            encoding = response.info().get_content_charset('utf8')
-            data = json.loads(response.read().decode(encoding))
+            response = requests.get(url)
+            if response.status_code >= 400:
+                raise Exception('FAILURE!')
+            data = response.json()
         except:
             return Response(None, status = status.HTTP_502_BAD_GATEWAY)
         return JsonResponse({"weather": data['properties'], "city": api[1][0], "state": api[1][1], "updateState": api[2]}, safe = False)
@@ -186,9 +189,10 @@ def hourly_API(request):
             return Response(None, status = status.HTTP_502_BAD_GATEWAY)
         url = whether[0]['forecastHourly']
         try:
-            response = urllib.request.urlopen(url)
-            encoding = response.info().get_content_charset('utf8')
-            data = json.loads(response.read().decode(encoding))
+            response = requests.get(url)
+            if response.status_code >= 400:
+                raise Exception('FAILURE!')
+            data = response.json()
         except:
             return Response(None, status = status.HTTP_502_BAD_GATEWAY)
         weather = data['properties']
