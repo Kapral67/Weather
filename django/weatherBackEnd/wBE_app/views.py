@@ -1,28 +1,21 @@
-# from django.views.decorators import csrf
 import googlemaps
 import requests
 import json
 import string
-# from dateutil import parser # TimeZone handling
+import time as tee
 
 from django.http.response import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-# from django.views.decorators.debug import sensitive_post_parameters
 from django.contrib.auth import login
 from django.utils.decorators import method_decorator
 
 from rest_framework import generics, permissions, status, mixins
-from rest_framework.decorators import api_view, parser_classes#, permission_classes
+from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
-# from rest_framework.serializers import Serializer
-# from rest_framework.views import APIView
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 
 from knox.views import LoginView as KnoxLoginView
-# from knox.models import AuthToken
-
-# from rest_auth.registration.views import RegisterView
 
 from wBE_app.serializers import AlterPrefsSerializer, LocationSerializer, UserSerializer, RegisterSerializer, ChangePasswordSerializer
 from wBE_app.models import Locations, Account
@@ -30,7 +23,7 @@ from wBE_app.models import Locations, Account
 with open('/code/django/weatherBackEnd/wBE_app/secret/geocode.txt') as f:
     API_KEY = f.read().strip()
 
-gmaps = googlemaps.Client(key = API_KEY) # DO NOT MAKE KEY PUBLIC!
+gmaps = googlemaps.Client(key = API_KEY)
 NWS_URL = 'https://api.weather.gov/points/'
 ALERT_URL = 'https://api.weather.gov/alerts/active?point='
 
@@ -81,8 +74,9 @@ def searchLocation_API(request, alert = False):
     if alert:
         return points
     url = NWS_URL + points
+    headers = {'Feature-Flags': str(tee.time())}
     try:
-        response = requests.get(url)
+        response = requests.get(url, headers = headers)
         if response.status_code >= 400:
             raise Exception('FAILURE!')
         data = response.json()
@@ -126,8 +120,9 @@ def alert_API(request):
         if points == 502:
             return Response(None, status = status.HTTP_502_BAD_GATEWAY)
         url = ALERT_URL + points
+        headers = {'Feature-Flags': str(tee.time())}
         try:
-            response = requests.get(url)
+            response = requests.get(url, headers = headers)
             if response.status_code >= 400:
                 raise Exception('FAILURE!')
             data = response.json()
@@ -166,8 +161,9 @@ def daily_API(request):
         if api == 502:
             return Response(None, status = status.HTTP_502_BAD_GATEWAY)
         url = api[0]['forecast']
+        headers = {'Feature-Flags': str(tee.time())}
         try:
-            response = requests.get(url)
+            response = requests.get(url, headers = headers)
             if response.status_code >= 400:
                 raise Exception('FAILURE!')
             data = response.json()
@@ -188,8 +184,9 @@ def hourly_API(request):
         if whether == 502:
             return Response(None, status = status.HTTP_502_BAD_GATEWAY)
         url = whether[0]['forecastHourly']
+        headers = {'Feature-Flags': str(tee.time())}
         try:
-            response = requests.get(url)
+            response = requests.get(url, headers = headers)
             if response.status_code >= 400:
                 raise Exception('FAILURE!')
             data = response.json()
