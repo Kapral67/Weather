@@ -27,6 +27,7 @@
 #### Setting Up Nginx:
 
    - `docker-compose build nginx`
+      - [<sub>For Dockerfile Details</sub>](https://raw.githubusercontent.com/nginxinc/docker-nginx/6a9fffa542c291b92bb5b135e67cea1e6c92c346/modules/Dockerfile)
 
 #### Running:
 
